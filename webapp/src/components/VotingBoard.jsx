@@ -40,7 +40,8 @@ export default function VotingBoard({ boardId }) {
       .then(setParticipant)
       .catch((e) => setError(e.message));
 
-    const unsubscribe = subscribeVotes(boardId, setVotes);
+    const unsubscribe = subscribeVotes(boardId, setVotes, () =>
+      setError('The live vote counts stopped updating. Reload this page to see the latest.'));
     return unsubscribe;
   }, [boardId]);
 

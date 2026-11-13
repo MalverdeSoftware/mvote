@@ -33,6 +33,9 @@ def main():
               help="Write the board definition (JSON) to this path instead of stdout.")
 @click.option("--publish/--no-publish", default=False,
               help="Also write the board to Firebase and print a shareable link + QR code.")
+@click.option("--overwrite", is_flag=True, default=False,
+              help="With --publish, replace a board that already has this id. Its vote counts "
+                   "return to zero; dots participants already spent stay spent.")
 @click.option("--base-url", default=None,
               help=f"Webapp base URL for the shareable link (or set {DEFAULT_BASE_URL_ENV}). "
                    "Only used with --publish.")
@@ -40,7 +43,7 @@ def main():
               help="Save the shareable link's QR code as a PNG to this path (only with --publish; "
                    "prints an ASCII QR code to the terminal if omitted).")
 def create(config_path: str, title: str, board_id: str | None, out_path: str | None,
-           publish: bool, base_url: str | None, qr_out_path: str | None):
+           publish: bool, overwrite: bool, base_url: str | None, qr_out_path: str | None):
     """Create a new board from an item config file.
 
     With --publish, also writes the board to Firestore (see cli/README.md
@@ -63,7 +66,11 @@ def create(config_path: str, title: str, board_id: str | None, out_path: str | N
         click.echo(text)
 
     if publish:
-        firebase_store.save_board(board)
+        try:
+            firebase_store.save_board(board, overwrite=overwrite)
+        except firebase_store.BoardExistsError as e:
+            click.echo(str(e), err=True)
+            sys.exit(1)
         click.echo(f"Board '{board.board_id}' published to Firestore.")
 
         resolved_base_url = base_url or os.environ.get(DEFAULT_BASE_URL_ENV)

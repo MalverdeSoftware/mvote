@@ -21,7 +21,8 @@ export async function loadBoard(boardId) {
   return { boardId, title: data.title, items: data.items };
 }
 
-export function subscribeVotes(boardId, callback) {
+// onError is called if the live connection ends; Firestore stops the listener when that happens.
+export function subscribeVotes(boardId, callback, onError) {
   const votesRef = collection(db, 'boards', boardId, 'votes');
   return onSnapshot(votesRef, (snapshot) => {
     const counts = {};
@@ -30,7 +31,7 @@ export function subscribeVotes(boardId, callback) {
       counts[d.id] = { count: data.count || 0, placements: data.placements || [] };
     });
     callback(counts);
-  });
+  }, onError);
 }
 
 export async function joinParticipant(boardId, participantId) {
