@@ -20,12 +20,12 @@ The web app bundles these packages into the page that participants and facilitat
 - **Mona Sans** is served to browsers as web font files under the [SIL Open Font License 1.1](https://openfontlicense.org/open-font-license-official-text/). The font is not modified.
 - **Firebase:** using Firebase services (the database behind mvote.app) is also governed by Google's terms of service.
 
-All 128 runtime packages, including those the packages above depend on:
+All 130 runtime packages, including those the packages above depend on:
 
 | License | Packages |
 |---|---|
-| Apache-2.0 | 57 |
-| MIT | 52 |
+| Apache-2.0 | 58 |
+| MIT | 53 |
 | BSD-3-Clause | 11 |
 | ISC | 5 |
 | OFL-1.1 | 1 |
@@ -36,7 +36,7 @@ The one without a license field is **scrollbar-width** 3.1.1. Its own LICENSE fi
 
 ## Build and test tools (not in the live site)
 
-208 development packages run only when building and testing the web app: MIT 190, ISC 8, Apache-2.0 4, BSD-2-Clause 2, BSD-3-Clause 2, MIT-0 1, and CC-BY-4.0 1 (`caniuse-lite`, browser-support data used by the build).
+145 development packages run only when building and testing the web app: MIT 121, MPL-2.0 12, Apache-2.0 4, ISC 3, BSD-2-Clause 2, BSD-3-Clause 2, and MIT-0 1. The MPL-2.0 packages are `lightningcss` and its platform binaries, a build tool; MPL-2.0 applies at the file level.
 
 ## Python command-line tool (`cli/`)
 
