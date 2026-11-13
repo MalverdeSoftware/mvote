@@ -66,7 +66,7 @@ Live at:
 
 `wrangler.jsonc` builds the web app before every deploy, so Workers Builds only needs the deploy command `npx wrangler deploy` from the repo root.
 
-To redeploy after a change, merge to `main`. Cloudflare Workers Builds builds and deploys from this repo. Other branches get a preview URL only.
+To redeploy after a change, merge to `main`. Cloudflare Workers Builds (Worker `mvote`, connected to MalverdeSoftware/mvote with its own build token) builds and deploys every push to `main`. Preview builds are off, so other branches don't deploy; check them locally with `npm run verify`.
 
 Builds read the Firebase web config from `.env.production`, which is committed on purpose. Those values go to every participant's browser anyway, and a build without them hangs on "Loading board…". After you change that file or the build setup, open a board on the live site to check that it loads.
 
