@@ -1,6 +1,6 @@
 # Contributing to mVote
 
-Thank you for your interest. Issues, questions, and pull requests are welcome.
+Thank you for your interest. Issues, questions, and pull requests are welcome. For a security problem, follow [SECURITY.md](SECURITY.md) instead of opening an issue.
 
 mVote is licensed under the [Apache License 2.0](LICENSE). Under Section 5 of the license, contributions you submit are licensed under the same terms.
 
