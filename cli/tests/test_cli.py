@@ -15,7 +15,7 @@ def test_create_without_publish_does_not_touch_firebase(tmp_path, monkeypatch):
     calls = []
     monkeypatch.setattr(
         "mvote.cli.firebase_store.save_board",
-        lambda board, db=None: calls.append(board),
+        lambda board, db=None, overwrite=False: calls.append(board),
     )
 
     result = CliRunner().invoke(main, [
@@ -30,7 +30,7 @@ def test_create_with_publish_writes_board_and_prints_link(tmp_path, monkeypatch)
     calls = []
     monkeypatch.setattr(
         "mvote.cli.firebase_store.save_board",
-        lambda board, db=None: calls.append(board),
+        lambda board, db=None, overwrite=False: calls.append(board),
     )
     monkeypatch.delenv("MVOTE_WEBAPP_URL", raising=False)
 
@@ -46,7 +46,7 @@ def test_create_with_publish_writes_board_and_prints_link(tmp_path, monkeypatch)
 
 
 def test_create_with_publish_uses_placeholder_url_when_unset(tmp_path, monkeypatch):
-    monkeypatch.setattr("mvote.cli.firebase_store.save_board", lambda board, db=None: None)
+    monkeypatch.setattr("mvote.cli.firebase_store.save_board", lambda board, db=None, overwrite=False: None)
     monkeypatch.delenv("MVOTE_WEBAPP_URL", raising=False)
 
     result = CliRunner().invoke(main, [
@@ -56,6 +56,30 @@ def test_create_with_publish_uses_placeholder_url_when_unset(tmp_path, monkeypat
 
     assert result.exit_code == 0, result.output
     assert "mvote.example/vote/b1" in result.output
+
+
+def test_create_with_publish_refuses_an_existing_board(tmp_path, monkeypatch):
+    from mvote.firebase_store import BoardExistsError
+
+    seen = []
+
+    def save(board, db=None, overwrite=False):
+        seen.append(overwrite)
+        if not overwrite:
+            raise BoardExistsError("Board 'b1' already exists.")
+
+    monkeypatch.setattr("mvote.cli.firebase_store.save_board", save)
+    args = ["create", "--config", str(_write_config(tmp_path)), "--title", "T",
+            "--board-id", "b1", "--publish", "--base-url", "https://example.com/vote"]
+
+    refused = CliRunner().invoke(main, args)
+    assert refused.exit_code == 1
+    assert "already exists" in refused.output
+    assert "Participant link" not in refused.output
+
+    replaced = CliRunner().invoke(main, args + ["--overwrite"])
+    assert replaced.exit_code == 0, replaced.output
+    assert seen == [False, True]
 
 
 def test_results_writes_csv(monkeypatch):

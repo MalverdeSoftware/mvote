@@ -92,6 +92,21 @@ def test_save_board_initializes_zero_vote_counts(tmp_path):
     assert firebase_store.fetch_vote_counts("b1", db=db) == {"v1": 0, "v2": 0}
 
 
+def test_save_board_leaves_an_existing_board_and_its_votes_alone(tmp_path):
+    db = FakeFirestoreClient()
+    board = create_board(_write_config(tmp_path), title="T", board_id="b1")
+    firebase_store.save_board(board, db=db)
+    votes = db.collection("boards").document("b1").collection("votes")
+    votes.document(board.items[0].id).set({"count": 5})
+
+    with pytest.raises(firebase_store.BoardExistsError):
+        firebase_store.save_board(board, db=db)
+    assert firebase_store.fetch_vote_counts("b1", db=db)[board.items[0].id] == 5
+
+    firebase_store.save_board(board, db=db, overwrite=True)
+    assert firebase_store.fetch_vote_counts("b1", db=db)[board.items[0].id] == 0
+
+
 def test_fetch_vote_counts_reflects_updates(tmp_path):
     db = FakeFirestoreClient()
     board = create_board(_write_config(tmp_path), title="Week 3", board_id="b1")

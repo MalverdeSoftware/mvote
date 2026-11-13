@@ -1,12 +1,13 @@
 import { act, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { joinParticipant, loadBoard } from '../data/index.js';
+import { joinParticipant, loadBoard, subscribeVotes } from '../data/index.js';
 import VotingBoard from './VotingBoard.jsx';
 
 vi.mock('../data/index.js', async (importOriginal) => ({
   ...(await importOriginal()),
   loadBoard: vi.fn(),
   joinParticipant: vi.fn(),
+  subscribeVotes: vi.fn(),
 }));
 
 const BOARD = { boardId: 'b', title: 'Board', items: [] };
@@ -57,5 +58,22 @@ describe('VotingBoard when the connection fails', () => {
 
     await act(async () => {});
     expect(screen.getByRole('alert')).toHaveTextContent('Could not join.');
+  });
+
+  it('says so when the live vote counts stop updating', async () => {
+    let failSubscription;
+    loadBoard.mockResolvedValue(BOARD);
+    joinParticipant.mockResolvedValue({ remainingDots: 8, votes: {} });
+    subscribeVotes.mockImplementation((boardId, onVotes, onError) => {
+      failSubscription = onError;
+      return () => {};
+    });
+    render(<VotingBoard boardId="b" />);
+    await act(async () => {});
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    act(() => failSubscription(new Error('permission-denied')));
+    expect(screen.getByRole('alert')).toHaveTextContent('stopped updating');
+    expect(screen.getByRole('heading', { name: 'Board' })).toBeInTheDocument();
   });
 });

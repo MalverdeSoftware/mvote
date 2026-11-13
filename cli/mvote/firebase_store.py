@@ -39,10 +39,26 @@ def get_client() -> Any:
     return firestore.client()
 
 
-def save_board(board: Board, db: Any = None) -> None:
-    """Write a board and its zero-initialized vote counts to Firestore."""
+class BoardExistsError(ValueError):
+    """Raised when publishing would replace a board that is already there."""
+
+
+def save_board(board: Board, db: Any = None, overwrite: bool = False) -> None:
+    """Write a board and its zero-initialized vote counts to Firestore.
+
+    Publishing sets every count to zero, so a board that already exists is
+    left alone unless ``overwrite`` is true.
+
+    Raises:
+        BoardExistsError: if the board exists and ``overwrite`` is false.
+    """
     db = db or get_client()
     board_ref = db.collection(BOARDS_COLLECTION).document(board.board_id)
+    if not overwrite and board_ref.get().exists:
+        raise BoardExistsError(
+            f"Board '{board.board_id}' already exists. Publishing again would reset its "
+            "votes to zero. Choose another --board-id, or pass --overwrite to replace it."
+        )
     board_ref.set(
         {
             "title": board.title,

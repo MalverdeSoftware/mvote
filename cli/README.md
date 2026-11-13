@@ -25,6 +25,8 @@ Add `--publish` to also write the board to Firestore and print a link and QR cod
 mvote create --config ../examples/chks_example.json --title "Week 3" --publish
 ```
 
+Publishing sets every vote count to zero, so the tool won't publish over a board that already exists. Choose another `--board-id`, or add `--overwrite` if you mean to replace the board and start its counts again.
+
 This needs a Firebase project with **Firestore** turned on. Sign the tool in with a service account key. In the Firebase console, go to Project settings, then Service accounts, then Generate new private key. Then set `GOOGLE_APPLICATION_CREDENTIALS` to the downloaded JSON file. **Never commit this file to the repo.**
 
 ```bash
