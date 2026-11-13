@@ -4,6 +4,8 @@ on:
     paths: ['webapp/**', 'scripts/**', '.node-version', '.github/workflows/webapp-tests.yml']
   pull_request:
     paths: ['webapp/**', 'scripts/**', '.node-version', '.github/workflows/webapp-tests.yml']
+permissions:
+  contents: read
 jobs:
   verify:
     runs-on: ubuntu-latest

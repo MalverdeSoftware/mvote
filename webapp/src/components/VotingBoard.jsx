@@ -50,14 +50,13 @@ export default function VotingBoard({ boardId }) {
     return () => clearTimeout(timer);
   }, [loaded]);
 
-  async function handleVote(itemId) {
+  // Runs one write at a time and shows its error, if any.
+  async function runWrite(write) {
     if (writeInFlightRef.current) return;
     writeInFlightRef.current = true;
     setPending(true);
     try {
-      const participantId = getParticipantId(boardId);
-      const updated = await castVote(boardId, participantId, itemId);
-      setParticipant(updated);
+      await write(getParticipantId(boardId));
       setError(null);
     } catch (e) {
       setError(e.message);
@@ -67,22 +66,16 @@ export default function VotingBoard({ boardId }) {
     }
   }
 
-  async function handleRequestMoreDots() {
-    if (writeInFlightRef.current) return;
-    writeInFlightRef.current = true;
-    setPending(true);
-    try {
-      const participantId = getParticipantId(boardId);
+  const handleVote = (itemId) =>
+    runWrite(async (participantId) => {
+      setParticipant(await castVote(boardId, participantId, itemId));
+    });
+
+  const handleRequestMoreDots = () =>
+    runWrite(async (participantId) => {
       const updated = await requestMoreDots(boardId, participantId);
       setParticipant((prev) => ({ ...prev, remainingDots: updated.remainingDots }));
-      setError(null);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      writeInFlightRef.current = false;
-      setPending(false);
-    }
-  }
+    });
 
   if (error && !loaded) {
     return (

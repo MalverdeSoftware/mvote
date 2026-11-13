@@ -1,10 +1,9 @@
 """Create and export mVote voting sessions ("boards").
 
-This module intentionally does not depend on any specific backend
-(Firebase, etc.) yet — :func:`create_board` returns a plain dict describing
-the session, and a backend-specific writer is expected to be layered on top
-(see docs/ROADMAP.md, Stage 2). Keeping this backend-agnostic is what lets
-someone deploy mVote without being locked into Firebase specifically.
+This module does not depend on any backend. :func:`create_board` returns a
+:class:`Board`, and a backend-specific writer (``firebase_store``) saves it.
+Keeping this backend-agnostic is what lets someone deploy mVote without
+being locked into Firebase specifically.
 """
 from __future__ import annotations
 
@@ -26,8 +25,7 @@ class Board:
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict:
-        d = asdict(self)
-        return d
+        return asdict(self)
 
 
 def create_board(config_path: str | Path, title: str, board_id: str | None = None) -> Board:
@@ -49,19 +47,17 @@ def create_board(config_path: str | Path, title: str, board_id: str | None = Non
 def export_results(board: Board, vote_counts: dict[str, int]) -> list[dict]:
     """Produce a tidy, analysis-ready export of vote results.
 
-    Returns one row per item: ``board_id``, ``item_id``, ``label``,
-    ``vote_count`` — the structured-data export that is mVote's core
-    differentiator versus workshop-oriented dot-voting tools.
+    Returns one row per item: ``board_id``, ``board_title``, ``item_id``,
+    ``label``, ``vote_count`` — the structured-data export that is mVote's
+    core differentiator versus workshop-oriented dot-voting tools.
     """
-    rows = []
-    for item in board.items:
-        rows.append(
-            {
-                "board_id": board.board_id,
-                "board_title": board.title,
-                "item_id": item.id,
-                "label": item.label,
-                "vote_count": vote_counts.get(item.id, 0),
-            }
-        )
-    return rows
+    return [
+        {
+            "board_id": board.board_id,
+            "board_title": board.title,
+            "item_id": item.id,
+            "label": item.label,
+            "vote_count": vote_counts.get(item.id, 0),
+        }
+        for item in board.items
+    ]

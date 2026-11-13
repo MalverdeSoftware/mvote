@@ -58,3 +58,27 @@ def test_unsupported_extension(tmp_path):
 def test_missing_file(tmp_path):
     with pytest.raises(FileNotFoundError):
         load_items(tmp_path / "does_not_exist.json")
+
+
+def test_ids_that_differ_only_by_type_are_duplicates(tmp_path):
+    p = tmp_path / "items.json"
+    p.write_text(json.dumps([
+        {"id": 1, "label": "A"},
+        {"id": "1", "label": "B"},
+    ]))
+    with pytest.raises(ConfigError, match="Duplicate"):
+        load_items(p)
+
+
+def test_item_that_is_not_an_object(tmp_path):
+    p = tmp_path / "items.json"
+    p.write_text(json.dumps(["Sleep quality", "Mood"]))
+    with pytest.raises(ConfigError, match="index 0"):
+        load_items(p)
+
+
+def test_invalid_json(tmp_path):
+    p = tmp_path / "items.json"
+    p.write_text("[{'id': 'v1'}")
+    with pytest.raises(ConfigError, match="not valid JSON"):
+        load_items(p)

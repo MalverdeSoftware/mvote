@@ -62,17 +62,21 @@ def load_items(path: str | Path) -> list[Item]:
     items = []
     seen_ids = set()
     for i, raw in enumerate(raw_items):
+        if not isinstance(raw, dict):
+            raise ConfigError(f"Item at index {i} must be an object with id and label.")
         missing = [f for f in REQUIRED_FIELDS if not raw.get(f)]
         if missing:
             raise ConfigError(
                 f"Item at index {i} is missing required field(s): {missing}"
             )
-        if raw["id"] in seen_ids:
-            raise ConfigError(f"Duplicate item id found: '{raw['id']}'")
-        seen_ids.add(raw["id"])
+        # Compared as text, the way ids are stored: 1 and "1" are the same id.
+        item_id = str(raw["id"])
+        if item_id in seen_ids:
+            raise ConfigError(f"Duplicate item id found: '{item_id}'")
+        seen_ids.add(item_id)
         items.append(
             Item(
-                id=str(raw["id"]),
+                id=item_id,
                 label=str(raw["label"]),
                 description=str(raw.get("description", "") or ""),
             )
@@ -86,7 +90,10 @@ def load_items(path: str | Path) -> list[Item]:
 
 def _load_json(path: Path) -> list[dict]:
     with path.open("r", encoding="utf-8") as f:
-        data = json.load(f)
+        try:
+            data = json.load(f)
+        except json.JSONDecodeError as e:
+            raise ConfigError(f"Config file is not valid JSON: {e}") from e
     if not isinstance(data, list):
         raise ConfigError("JSON config must be a list of item objects.")
     return data
