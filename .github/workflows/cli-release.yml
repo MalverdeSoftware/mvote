@@ -1,9 +1,8 @@
 # Release workflow for the mvote command-line tool (SPEC-distribution in MalverdeSoftware/malverdesoftware).
-# Phase 0: dry run only. It builds the sdist and wheel, runs `twine check --strict` and
-# scripts/check-cli-release.py, and keeps the files as a workflow artifact. Nothing goes to PyPI.
-# Phase 1 (at the public flip) adds a publish job using PyPI trusted publishing
-# (`id-token: write` with pypa/gh-action-pypi-publish) in a `pypi` environment.
-name: CLI release (dry run)
+# Every run builds the sdist and wheel, runs `twine check --strict` and scripts/check-cli-release.py,
+# installs the wheel, and keeps the files as an artifact. A tag `v<version>` also publishes to PyPI
+# through trusted publishing (OIDC) in the `pypi` environment; no token is stored.
+name: CLI release
 on:
   workflow_dispatch:
   push:
@@ -52,3 +51,19 @@ jobs:
           name: mvote-cli
           path: cli/dist/*
           retention-days: 14
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: pypi
+      url: https://pypi.org/project/mvote/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: mvote-cli
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
