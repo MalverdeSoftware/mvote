@@ -26,7 +26,7 @@ Items that need attribution or a note:
 - **combokeys**: Apache-2.0 (the package metadata writes it as "Apache 2.0").
 - **scrollbar-width**: its npm metadata has no license field. Its GitHub repository (olmokramer/scrollbar-width.js) carries the MIT license, copyright 2014 Olmo Kramer.
 - **caniuse-lite**: CC-BY-4.0 data, used by the build toolchain (development dependency).
-- **`@malverdesoftware/ui`**: this project's own shared package, vendored in `webapp/vendor/malverdesoftware/`. It is licensed under Apache-2.0, copyright The Johns Hopkins University. The vendored 0.1.1 tarball carries its LICENSE and NOTICE.
+- **`@malverdesoftware/ui`**: this project's own shared package, installed from npm (0.1.1). It is licensed under Apache-2.0, copyright The Johns Hopkins University, and carries its LICENSE and NOTICE.
 
 ## Python CLI and demos (`cli/`, `demos/`)
 
