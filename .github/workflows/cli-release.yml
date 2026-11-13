@@ -1,7 +1,9 @@
 # Release workflow for the mvote command-line tool (SPEC-distribution in MalverdeSoftware/malverdesoftware).
 # Every run builds the sdist and wheel, runs `twine check --strict` and scripts/check-cli-release.py,
 # installs the wheel, and keeps the files as an artifact. A tag `v<version>` also publishes to PyPI
-# through trusted publishing (OIDC) in the `pypi` environment; no token is stored.
+# through trusted publishing (OIDC) in the `pypi` environment; no token is stored. The upload runs
+# only while the repository variable PYPI_PUBLISH is 'true'. To upload a version that was tagged
+# while it was off, set the variable and run this workflow by hand on that tag.
 name: CLI release
 on:
   workflow_dispatch:
@@ -52,7 +54,7 @@ jobs:
           path: cli/dist/*
           retention-days: 14
   publish:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') && vars.PYPI_PUBLISH == 'true'
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 10
