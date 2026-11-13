@@ -15,6 +15,7 @@ from .config import ConfigError
 
 DEFAULT_BASE_URL_ENV = "MVOTE_WEBAPP_URL"
 PLACEHOLDER_BASE_URL = "https://mvote.example/vote"
+RESULT_FIELDS = ["board_id", "board_title", "item_id", "label", "vote_count"]
 
 
 @click.group()
@@ -99,17 +100,18 @@ def results(board_id: str, out_path: str | None):
         click.echo(str(e), err=True)
         sys.exit(1)
 
-    fieldnames = ["board_id", "board_title", "item_id", "label", "vote_count"]
     if out_path:
         with open(out_path, "w", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(rows)
+            _write_results(f, rows)
         click.echo(f"Results for board '{board_id}' written to {out_path}")
     else:
-        writer = csv.DictWriter(sys.stdout, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(rows)
+        _write_results(sys.stdout, rows)
+
+
+def _write_results(stream, rows: list[dict]) -> None:
+    writer = csv.DictWriter(stream, fieldnames=RESULT_FIELDS)
+    writer.writeheader()
+    writer.writerows(rows)
 
 
 if __name__ == "__main__":

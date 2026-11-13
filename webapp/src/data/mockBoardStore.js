@@ -16,31 +16,27 @@ const boards = new Map();
 const participants = new Map();
 const voteListeners = new Map();
 
-function boardKey(boardId) {
-  return boardId;
-}
-
 function participantKey(boardId, participantId) {
   return `${boardId}:${participantId}`;
 }
 
 function ensureBoard(boardId) {
-  if (!boards.has(boardKey(boardId))) {
+  if (!boards.has(boardId)) {
     const votes = {};
     for (const item of DEMO_ITEMS) votes[item.id] = { count: 0, placements: [] };
-    boards.set(boardKey(boardId), {
+    boards.set(boardId, {
       boardId,
       title: 'Demo board (mock data)',
       items: DEMO_ITEMS,
       votes,
     });
   }
-  return boards.get(boardKey(boardId));
+  return boards.get(boardId);
 }
 
 function notifyVoteListeners(boardId) {
   const board = ensureBoard(boardId);
-  const listeners = voteListeners.get(boardKey(boardId)) || [];
+  const listeners = voteListeners.get(boardId) || [];
   for (const cb of listeners) cb({ ...board.votes });
 }
 
@@ -50,12 +46,11 @@ export async function loadBoard(boardId) {
 }
 
 export function subscribeVotes(boardId, callback) {
-  const key = boardKey(boardId);
-  if (!voteListeners.has(key)) voteListeners.set(key, []);
-  voteListeners.get(key).push(callback);
+  if (!voteListeners.has(boardId)) voteListeners.set(boardId, []);
+  voteListeners.get(boardId).push(callback);
   callback({ ...ensureBoard(boardId).votes });
   return () => {
-    voteListeners.set(key, voteListeners.get(key).filter((cb) => cb !== callback));
+    voteListeners.set(boardId, voteListeners.get(boardId).filter((cb) => cb !== callback));
   };
 }
 
