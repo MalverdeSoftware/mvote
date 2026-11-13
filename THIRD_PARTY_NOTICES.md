@@ -1,38 +1,57 @@
 # Third-party notices
 
-mVote uses third-party software. Each package keeps its own license, and nothing in this repository changes those terms. This summary was generated from `webapp/package-lock.json` and the Python manifests on 2026-11-11. The lockfile's `license` fields are the complete, per-package record.
+mVote is free, open-source software under the [Apache License 2.0](LICENSE) (see also [NOTICE](NOTICE)). It is built on open-source software by others. Each of those packages keeps its own license, and nothing in this repository changes those terms.
 
-## Web app (`webapp/`)
+This summary was generated from `webapp/package-lock.json` and the Python package metadata on 2026-11-13. The lockfile records each npm package's license, and each installed package carries its own license file.
 
-336 packages in the lockfile (direct and transitive, runtime and development).
+## In the live site (mvote.app)
+
+The web app bundles these packages into the page that participants and facilitators load.
+
+| Package | Version | License | Copyright |
+|---|---|---|---|
+| React, React DOM (`react`, `react-dom`) | 18.3.1 | MIT | Facebook, Inc. and its affiliates |
+| JetBrains Ring UI (`@jetbrains/ring-ui-built`) | 7.0.133 | Apache-2.0 | 2000–2016 JetBrains s.r.o. |
+| JetBrains Icons (`@jetbrains/icons`) | 5.24.0 | Apache-2.0 | 2010–2017 JetBrains s.r.o. |
+| Firebase JavaScript SDK (`firebase`) | 11.10.0 | Apache-2.0 | Google LLC |
+| Mona Sans (`@fontsource-variable/mona-sans`) | 5.3.0 | SIL Open Font License 1.1 | 2022 The Mona Sans Project Authors, with Reserved Font Name "Mona" |
+| `@malverdesoftware/ui` | 0.1.1 | Apache-2.0 | 2026 The Johns Hopkins University |
+
+- **Mona Sans** is served to browsers as web font files under the [SIL Open Font License 1.1](https://openfontlicense.org/open-font-license-official-text/). The font is not modified.
+- **Firebase:** using Firebase services (the database behind mvote.app) is also governed by Google's terms of service.
+
+All 128 runtime packages, including those the packages above depend on:
 
 | License | Packages |
 |---|---|
-| MIT | 242 |
-| Apache-2.0 (including one written "Apache 2.0") | 60 |
-| ISC | 13 |
-| BSD-3-Clause | 13 |
-| BSD-2-Clause | 2 |
-| MIT-0, 0BSD | 2 |
+| Apache-2.0 | 57 |
+| MIT | 52 |
+| BSD-3-Clause | 11 |
+| ISC | 5 |
 | OFL-1.1 | 1 |
-| CC-BY-4.0 | 1 |
-| No license field in the lockfile | 2 |
+| 0BSD | 1 |
+| No license field in npm metadata | 1 |
 
-Items that need attribution or a note:
+The one without a license field is **scrollbar-width** 3.1.1. Its own LICENSE file is MIT, copyright 2014 Olmo Kramer. One Apache-2.0 package, **combokeys**, writes its license as "Apache 2.0".
 
-- **JetBrains Ring UI** (`@jetbrains/ring-ui-built`) and **JetBrains Icons** (`@jetbrains/icons`): Apache-2.0.
-- **Mona Sans** (`@fontsource-variable/mona-sans`): SIL Open Font License 1.1. The font license text must stay with any redistributed font files.
-- **Firebase JS SDK** (`firebase`): Apache-2.0. Use of Firebase services is separately governed by Google's terms.
-- **combokeys**: Apache-2.0 (the package metadata writes it as "Apache 2.0").
-- **scrollbar-width**: its npm metadata has no license field. Its GitHub repository (olmokramer/scrollbar-width.js) carries the MIT license, copyright 2014 Olmo Kramer.
-- **caniuse-lite**: CC-BY-4.0 data, used by the build toolchain (development dependency).
-- **`@malverdesoftware/ui`**: this project's own shared package, installed from npm (0.1.1). It is licensed under Apache-2.0, copyright The Johns Hopkins University, and carries its LICENSE and NOTICE.
+## Build and test tools (not in the live site)
 
-## Python CLI and demos (`cli/`, `demos/`)
+208 development packages run only when building and testing the web app: MIT 190, ISC 8, Apache-2.0 4, BSD-2-Clause 2, BSD-3-Clause 2, MIT-0 1, and CC-BY-4.0 1 (`caniuse-lite`, browser-support data used by the build).
 
-Direct dependencies: `qrcode`, `click`, `firebase-admin` (CLI); `numpy`, `pandas`, `scikit-learn`, `scipy`, `joblib`, `threadpoolctl` (demo). Their licenses were not machine-checked in this pass. Confirm each from its package metadata before release.
+## Python command-line tool (`cli/`)
 
-## Review before release
+`pip` installs these alongside the tool; they are not bundled with it.
 
-- Re-run this inventory when dependencies change and before the first public release.
-- This project's own code is Apache-2.0 (2026-11-12), which is compatible with the Apache-2.0 packages above.
+| Package | License |
+|---|---|
+| `click` | BSD-3-Clause |
+| `qrcode` (with `pillow` for images) | BSD; Pillow is MIT-CMU |
+| `firebase-admin` | Apache-2.0. Using Firebase services is also governed by Google's terms |
+
+## Demo (`demos/nov4-iwfp-talk/`)
+
+`numpy` (BSD-3-Clause, with parts under 0BSD, MIT, Zlib and CC0-1.0), `pandas`, `scikit-learn`, and scikit-learn's dependencies `scipy`, `joblib` and `threadpoolctl` (all BSD-3-Clause).
+
+## Keeping this current
+
+This file is regenerated when dependencies change. If you find a missing or wrong attribution, please [open an issue](https://github.com/MalverdeSoftware/mvote/issues).
