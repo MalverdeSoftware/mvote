@@ -1,0 +1,207 @@
+/* What only mVote needs. The shared layer is @malverdesoftware/ui's base.css and accent-green.css; rules:
+   SPEC-ui in malverdesoftware. Every color below except the stickers is a Ring variable. */
+
+.page-centered {
+  /* Keeps the footer at the bottom of short pages. */
+  min-height: calc(100dvh - 8rem);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.connection-hint {
+  max-width: 24rem;
+  text-align: left;
+}
+
+.voting-board {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 4rem;
+}
+
+.voting-board__header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--ring-content-background-color);
+}
+
+.voting-board__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  overflow-wrap: anywhere;
+}
+
+h1.voting-board__title {
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+  font-weight: 600;
+}
+
+.voting-board__more {
+  display: block;
+  margin: 0 1rem 0.75rem auto;
+}
+
+.voting-board__progress {
+  margin-bottom: 0;
+  border-radius: 0;
+  background-color: var(--ring-line-color);
+}
+
+.voting-board__error {
+  margin: 0.75rem 1rem 0;
+}
+
+.item-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 0.75rem;
+  padding: 0.75rem 1rem 0;
+}
+
+/* Compact on a phone: the live board has 84 items, so every card's height is
+   multiplied by a lot of scrolling. Tablets and laptops stack it (see below). */
+.item-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'title title'
+    'toggle toggle'
+    'description description'
+    'dots vote';
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--ring-line-color);
+  border-radius: 8px;
+}
+
+.item-card--open {
+  grid-column: 1 / -1;
+  border-color: var(--ring-main-color);
+  box-shadow: 0 0 0 1px var(--ring-main-color);
+}
+
+h2.item-card__title {
+  grid-area: title;
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.375rem;
+  font-weight: 500;
+}
+
+/* A 44px tap area around a one-line link, without pushing the layout apart. */
+.item-card__info-toggle {
+  grid-area: toggle;
+  justify-self: start;
+  position: relative;
+  height: 1.5rem;
+  padding: 0;
+}
+
+.item-card__info-toggle::after {
+  content: '';
+  position: absolute;
+  inset: -0.625rem 0;
+}
+
+.item-card__description {
+  grid-area: description;
+  margin: 0.25rem 0;
+}
+
+.item-card__footer {
+  display: contents;
+}
+
+/* Shares the toggle's row without taking a column, so "you: 3" appearing
+   can't resize the "+" button or the dots beside it. */
+.item-card__tally {
+  grid-area: toggle;
+  justify-self: end;
+  white-space: nowrap;
+}
+
+.item-card__footer .touch-button {
+  grid-area: vote;
+}
+
+.item-card__yours::before {
+  content: ' · ';
+}
+
+/* The dots from the in-person activity. Ring has no component for these, so
+   they're the one thing here that isn't Ring. */
+.dot-cluster {
+  grid-area: dots;
+  position: relative;
+  align-self: stretch;
+  border-radius: 6px;
+  background: var(--ring-sidebar-background-color);
+}
+
+.dot-cluster__dot {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1.5px solid rgba(20, 15, 10, 0.85);
+  transform: translate(-50%, -50%);
+}
+
+.dot-cluster__dot--circle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+.dot-cluster__dot--star {
+  width: 24px;
+  height: 24px;
+  clip-path: polygon(
+    50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%,
+    50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%
+  );
+}
+
+/* On a tablet or laptop the board sits in a bordered panel, as on a page. */
+@media (min-width: 640px) {
+  .voting-board {
+    margin: 1.5rem auto;
+    padding-bottom: 1rem;
+    border: 1px solid var(--ring-line-color);
+    border-radius: 8px;
+  }
+
+  .voting-board__header {
+    border-radius: 8px 8px 0 0;
+  }
+
+  .item-card {
+    grid-template-areas:
+      'title title'
+      'toggle toggle'
+      'description description'
+      'dots dots'
+      'tally vote';
+    gap: 0.5rem;
+  }
+
+  .item-card__tally {
+    grid-area: tally;
+    justify-self: start;
+  }
+
+  .dot-cluster {
+    height: 3.5rem;
+  }
+}

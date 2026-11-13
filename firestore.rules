@@ -1,0 +1,63 @@
+rules_version = '2';
+
+// Security rules for the mVote webapp's no-account, anonymous
+// voting flow. Deploy with: firebase deploy --only firestore:rules
+//
+// Known limitation (accepted for v1): these rules validate each document's
+// own write in isolation. A technically sophisticated participant could in
+// principle call Firestore directly to increment a votes/{itemId}.count
+// without spending a matching dot from their own participant doc, since
+// there's no cross-document atomicity check tying the two together. This
+// is judged an acceptable risk for a supervised classroom/CBPR session
+// with known, well-intentioned participants — not a public, adversarial
+// deployment. A stronger guarantee would require moving vote-casting into
+// a trusted Cloud Function, which needs Firebase's Blaze (pay-as-you-go)
+// plan; not pursued here to keep this within Firebase's free tier per the
+// project's stated cost goals (see docs/ROADMAP.md decision log).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /boards/{boardId} {
+      // Boards are written only by the facilitator's CLI via the Firebase
+      // Admin SDK, which bypasses these rules entirely. Clients only read.
+      allow read: if true;
+      allow write: if false;
+
+      match /votes/{itemId} {
+        // Vote docs are pre-created (count: 0) by the CLI when a board is
+        // published. Clients may only increment an existing item's count
+        // by exactly 1 per write — never create a new item, delete one,
+        // or set an arbitrary value.
+        allow read: if true;
+        allow create, delete: if false;
+        allow update: if request.resource.data.count == resource.data.count + 1
+                       && request.resource.data.diff(resource.data).affectedKeys()
+                            .hasOnly(['count', 'placements']);
+      }
+
+      match /participants/{participantId} {
+        // Anonymous, no-account participants. Readable by anyone (a
+        // participant needs to re-fetch their own remaining dots after a
+        // page reload); a participant may create their own starting
+        // record and can only update it via the two legitimate
+        // transitions — spending one dot, or re-upping by 4 once empty.
+        allow read: if true;
+        allow create: if request.resource.data.remaining_dots == 8
+                       && request.resource.data.votes == {};
+        allow update: if isDotSpend() || isReup();
+        allow delete: if false;
+
+        function isDotSpend() {
+          return resource.data.remaining_dots > 0
+                 && request.resource.data.remaining_dots == resource.data.remaining_dots - 1;
+        }
+
+        function isReup() {
+          return resource.data.remaining_dots == 0
+                 && request.resource.data.remaining_dots == 4
+                 && request.resource.data.votes == resource.data.votes;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "webapp/node_modules/wrangler/config-schema.json",
+  "name": "mvote",
+  "compatibility_date": "2026-09-11",
+  "workers_dev": true,
+  "observability": {
+    "enabled": true
+  },
+  // Builds the web app before every deploy, so Workers Builds needs no build command of its own.
+  "build": {
+    "command": "npm ci --prefix webapp && npm run build --prefix webapp"
+  },
+  "assets": {
+    "directory": "webapp/dist",
+    "not_found_handling": "single-page-application"
+  },
+  "routes": [
+    { "pattern": "mvote.app", "custom_domain": true }
+  ]
+}

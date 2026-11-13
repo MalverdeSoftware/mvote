@@ -1,0 +1,54 @@
+# Release workflow for the mvote command-line tool (SPEC-distribution in MalverdeSoftware/malverdesoftware).
+# Phase 0: dry run only. It builds the sdist and wheel, runs `twine check --strict` and
+# scripts/check-cli-release.py, and keeps the files as a workflow artifact. Nothing goes to PyPI.
+# Phase 1 (at the public flip) adds a publish job using PyPI trusted publishing
+# (`id-token: write` with pypa/gh-action-pypi-publish) in a `pypi` environment.
+name: CLI release (dry run)
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+  pull_request:
+    paths:
+      - 'cli/**'
+      - 'LICENSE'
+      - 'NOTICE'
+      - 'scripts/check-cli-release.py'
+      - '.github/workflows/cli-release.yml'
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: LICENSE and NOTICE copies match the root
+        run: python scripts/check-cli-release.py
+      - name: Build sdist and wheel
+        working-directory: cli
+        run: |
+          python -m pip install --quiet build twine
+          python -m build
+          python -m twine check --strict dist/*
+      - name: Check the built files
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            python scripts/check-cli-release.py --dist --tag "${GITHUB_REF_NAME}"
+          else
+            python scripts/check-cli-release.py --dist
+          fi
+      - name: Install the wheel and run it
+        run: |
+          python -m venv /tmp/wheel-test
+          /tmp/wheel-test/bin/pip install --quiet cli/dist/*.whl
+          /tmp/wheel-test/bin/mvote --version
+          /tmp/wheel-test/bin/mvote --help > /dev/null
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mvote-cli
+          path: cli/dist/*
+          retention-days: 14

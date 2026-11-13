@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+build/
+dist/
+
+# Node / webapp
+node_modules/
+.env
+.env.local
+dist/
+webapp/build/
+
+# Firebase
+.firebase/
+firebase-debug.log
+serviceAccountKey.json
+*firebase-adminsdk*.json
+.runtimeconfig.json
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
+
+# Phase 0 local build evidence and editor state
+.phase0/
+.idea/
+webapp/dist-demo/
+.env.*
+!.env.example
+# Firebase web config: public in every browser, and Cloudflare's builds need it.
+!webapp/.env.production
+
+# Preserved local writing proposals; reconcile before publishing
+docs/drafts/
+
+# Local research-workspace files: kept on disk for the author's tools, not published
+AGENTS.local.md
+.malverde-literature.json
+references/*
+!references/README.md
+docs/checkpoints.md
+docs/documentation-checkpoints.md

@@ -1,0 +1,116 @@
+"""Command-line interface for creating mVote voting sessions."""
+from __future__ import annotations
+
+import csv
+import json
+import os
+import sys
+from pathlib import Path
+
+import click
+
+from . import firebase_store
+from .board import create_board
+from .config import ConfigError
+
+DEFAULT_BASE_URL_ENV = "MVOTE_WEBAPP_URL"
+PLACEHOLDER_BASE_URL = "https://mvote.example/vote"
+
+
+@click.group()
+@click.version_option()
+def main():
+    """mVote: create participatory sticky-note voting sessions."""
+
+
+@main.command("create")
+@click.option("--config", "config_path", required=True, type=click.Path(exists=True),
+              help="Path to a CSV or JSON item config file.")
+@click.option("--title", required=True, help="Title for this session (e.g. 'Week 3').")
+@click.option("--board-id", default=None, help="Optional fixed board id; random if omitted.")
+@click.option("--out", "out_path", default=None, type=click.Path(),
+              help="Write the board definition (JSON) to this path instead of stdout.")
+@click.option("--publish/--no-publish", default=False,
+              help="Also write the board to Firebase and print a shareable link + QR code.")
+@click.option("--base-url", default=None,
+              help=f"Webapp base URL for the shareable link (or set {DEFAULT_BASE_URL_ENV}). "
+                   "Only used with --publish.")
+@click.option("--qr-out", "qr_out_path", default=None, type=click.Path(),
+              help="Save the shareable link's QR code as a PNG to this path (only with --publish; "
+                   "prints an ASCII QR code to the terminal if omitted).")
+def create(config_path: str, title: str, board_id: str | None, out_path: str | None,
+           publish: bool, base_url: str | None, qr_out_path: str | None):
+    """Create a new board from an item config file.
+
+    With --publish, also writes the board to Firestore (see cli/README.md
+    for the required GOOGLE_APPLICATION_CREDENTIALS setup) and prints a
+    shareable participant link and QR code.
+    """
+    try:
+        board = create_board(config_path, title=title, board_id=board_id)
+    except ConfigError as e:
+        click.echo(f"Config error: {e}", err=True)
+        sys.exit(1)
+
+    payload = board.to_dict()
+    text = json.dumps(payload, indent=2, default=str)
+
+    if out_path:
+        Path(out_path).write_text(text, encoding="utf-8")
+        click.echo(f"Board '{board.board_id}' written to {out_path}")
+    else:
+        click.echo(text)
+
+    if publish:
+        firebase_store.save_board(board)
+        click.echo(f"Board '{board.board_id}' published to Firestore.")
+
+        resolved_base_url = base_url or os.environ.get(DEFAULT_BASE_URL_ENV)
+        if not resolved_base_url:
+            resolved_base_url = PLACEHOLDER_BASE_URL
+            click.echo(
+                f"Note: no webapp URL configured (--base-url or {DEFAULT_BASE_URL_ENV}); "
+                "using a placeholder until the webapp is deployed.",
+                err=True,
+            )
+        link = f"{resolved_base_url.rstrip('/')}/{board.board_id}"
+        click.echo(f"Participant link: {link}")
+
+        import qrcode
+
+        if qr_out_path:
+            qrcode.make(link).save(qr_out_path)
+            click.echo(f"QR code written to {qr_out_path}")
+        else:
+            qr = qrcode.QRCode()
+            qr.add_data(link)
+            qr.print_ascii()
+
+
+@main.command("results")
+@click.option("--board-id", required=True, help="Id of a board previously created with --publish.")
+@click.option("--out", "out_path", default=None, type=click.Path(),
+              help="Write results as CSV to this path instead of stdout.")
+def results(board_id: str, out_path: str | None):
+    """Fetch live vote counts for a published board and export tidy results."""
+    try:
+        rows = firebase_store.export_board_results(board_id)
+    except ValueError as e:
+        click.echo(str(e), err=True)
+        sys.exit(1)
+
+    fieldnames = ["board_id", "board_title", "item_id", "label", "vote_count"]
+    if out_path:
+        with open(out_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
+        click.echo(f"Results for board '{board_id}' written to {out_path}")
+    else:
+        writer = csv.DictWriter(sys.stdout, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+if __name__ == "__main__":
+    main()
