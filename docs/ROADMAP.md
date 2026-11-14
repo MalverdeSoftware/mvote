@@ -12,14 +12,16 @@ This is where mVote stands and what comes next.
 - [x] Worked example in `examples/chks_example.json`, a curated set of 85 CHKS concepts
 - [x] Automated tests for config parsing, session creation, and the export format, run on every pull request
 - [x] CONTRIBUTING.md and CODE_OF_CONDUCT.md
+- [x] Command line tool published on PyPI as `mvote` 0.1.0 (2026-11-13), through trusted publishing from `.github/workflows/cli-release.yml`
 
 ## Next
 
 - [ ] Review and finalize the statement of need
 - [x] Add the Apache-2.0 LICENSE, NOTICE with the funding acknowledgment, and `CITATION.cff` (2026-11-12)
-- [ ] Mint a DOI at the first public release and add it to NOTICE, CITATION.cff and the README
+- [x] Mint a DOI at the first public release and add it to NOTICE, CITATION.cff and the README (Zenodo, 10.5281/zenodo.24206726)
 - [ ] Use mVote in a real class or CBPR session
-- [ ] Tag releases (v0.1.0 and on) as features land
+- [ ] Tag releases as features land (v0.1.0 tagged and published 2026-11-13)
+- [ ] Transfer the PyPI project to the MalverdeSoftware organization once PyPI approves it
 - [ ] Add more voting modes and basic reliability or consensus measures if sessions call for them
 
 ## Decisions
