@@ -5,11 +5,13 @@ This guide is for when you have a session coming up and want to know what to do.
 ## One-time setup
 
 1. **Install Python 3.9 or newer** if you don't have it.
-2. **Install the command line tool.** It isn't on PyPI yet, so install it from GitHub:
+2. **Install the command line tool** from [PyPI](https://pypi.org/project/mvote/):
 
    ```bash
-   pip install "git+https://github.com/MalverdeSoftware/mvote.git#subdirectory=cli"
+   pip install mvote
    ```
+
+   To try changes that haven't been released yet, install from GitHub instead: `pip install "git+https://github.com/MalverdeSoftware/mvote.git#subdirectory=cli"`.
 
 3. **Get a Firebase service account key.** You only need this to publish a live session you can share. If you just want to preview a config on your own computer, skip it. In the Firebase Console, go to Project Settings, then Service Accounts, then Generate new private key. Save the file outside any git repo and point the tool at it:
 
