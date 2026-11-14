@@ -6,4 +6,4 @@ import * as mockBoardStore from './mockBoardStore.js';
 
 const store = USE_MOCK ? mockBoardStore : firestoreBoardStore;
 
-export const { loadBoard, subscribeBoardStatus, subscribeVotes, joinParticipant, castVote, requestMoreDots } = store;
+export const { loadBoard, subscribeBoardStatus, subscribeVotes, joinParticipant, castVote, requestMoreDots, setDone } = store;

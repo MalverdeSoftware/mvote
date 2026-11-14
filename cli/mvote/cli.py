@@ -115,6 +115,22 @@ def results(board_id: str, out_path: str | None):
         _write_results(sys.stdout, rows)
 
 
+@main.command("status")
+@click.option("--board-id", required=True, help="Id of a published board.")
+def status(board_id: str):
+    """Show how many participants joined, how many are done, and dots placed."""
+    try:
+        s = firebase_store.board_status(board_id)
+    except ValueError as e:
+        click.echo(str(e), err=True)
+        sys.exit(1)
+    state = "closed" if s["closed"] else "open"
+    click.echo(
+        f"Board '{board_id}' is {state}: {s['done']} of {s['participants']} participants done, "
+        f"{s['dots_placed']} dots placed."
+    )
+
+
 @main.command("close")
 @click.option("--board-id", required=True, help="Id of a published board.")
 def close(board_id: str):

@@ -48,7 +48,8 @@ h1.voting-board__title {
   font-weight: 600;
 }
 
-.voting-board__more {
+.voting-board__more,
+.voting-board__done {
   display: block;
   margin: 0 1rem 0.75rem auto;
 }

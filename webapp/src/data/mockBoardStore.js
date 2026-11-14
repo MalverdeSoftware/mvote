@@ -78,7 +78,7 @@ export function subscribeVotes(boardId, callback) {
 export async function joinParticipant(boardId, participantId) {
   const key = participantKey(boardId, participantId);
   if (!participants.has(key)) {
-    participants.set(key, { remainingDots: STARTING_DOTS, votes: {} });
+    participants.set(key, { remainingDots: STARTING_DOTS, votes: {}, done: false });
   }
   return { ...participants.get(key) };
 }
@@ -90,6 +90,7 @@ export async function castVote(boardId, participantId, itemId) {
   if (!participant || participant.remainingDots <= 0) {
     throw new Error('No dots remaining.');
   }
+  if (participant.done) throw new Error('Tap "Keep voting" to place more dots.');
   participant.remainingDots -= 1;
   participant.votes[itemId] = (participant.votes[itemId] || 0) + 1;
   const board = ensureBoard(boardId);
@@ -110,4 +111,10 @@ export async function requestMoreDots(boardId, participantId) {
   }
   participant.remainingDots += REUP_DOTS;
   return { ...participant };
+}
+
+export async function setDone(boardId, participantId, done) {
+  assertOpen(boardId);
+  participants.get(participantKey(boardId, participantId)).done = done;
+  return done;
 }

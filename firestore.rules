@@ -68,14 +68,15 @@ service cloud.firestore {
         // it the ability to spend their dots. A participant may create
         // their own starting record and can only update it via the two
         // legitimate transitions — spending one dot, or re-upping by 4
-        // once empty.
+        // once empty — or mark themselves done (or not). A participant who
+        // is done can't spend dots until they choose to keep voting.
         allow get: if true;
         allow list: if false;
         allow create: if boardOpen()
                        && request.resource.data.remaining_dots == 8
                        && request.resource.data.votes == {}
                        && request.resource.data.keys().hasOnly(['remaining_dots', 'votes']);
-        allow update: if boardOpen() && (isDotSpend() || isReup());
+        allow update: if boardOpen() && (isDotSpend() || isReup() || isDoneToggle());
         allow delete: if false;
 
         // One dot goes to one item, and that item's count goes up by one in
@@ -84,6 +85,7 @@ service cloud.firestore {
           let item = request.resource.data.last_item;
           let votePath = /databases/$(database)/documents/boards/$(boardId)/votes/$(item);
           return item is string
+                 && !resource.data.get('done', false)
                  && resource.data.remaining_dots > 0
                  && request.resource.data.remaining_dots == resource.data.remaining_dots - 1
                  && request.resource.data.diff(resource.data).affectedKeys()
@@ -94,8 +96,15 @@ service cloud.firestore {
                  && getAfter(votePath).data.get('last_voter', null) == participantId;
         }
 
+        // "I'm done voting" and "Keep voting" change only the done flag.
+        function isDoneToggle() {
+          return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['done'])
+                 && request.resource.data.done is bool;
+        }
+
         function isReup() {
-          return resource.data.remaining_dots == 0
+          return !resource.data.get('done', false)
+                 && resource.data.remaining_dots == 0
                  && request.resource.data.remaining_dots == 4
                  && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['remaining_dots']);
         }

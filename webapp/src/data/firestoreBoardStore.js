@@ -5,6 +5,7 @@ import {
   onSnapshot,
   runTransaction,
   setDoc,
+  updateDoc,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { TRACK_PARTICIPANT_COLORS } from '../config.js';
@@ -46,11 +47,11 @@ export async function joinParticipant(boardId, participantId) {
   const snapshot = await getDoc(participantRef);
   if (snapshot.exists()) {
     const data = snapshot.data();
-    return { remainingDots: data.remaining_dots, votes: data.votes || {} };
+    return { remainingDots: data.remaining_dots, votes: data.votes || {}, done: Boolean(data.done) };
   }
   const initial = { remaining_dots: STARTING_DOTS, votes: {} };
   await setDoc(participantRef, initial);
-  return { remainingDots: initial.remaining_dots, votes: initial.votes };
+  return { remainingDots: initial.remaining_dots, votes: initial.votes, done: false };
 }
 
 export async function castVote(boardId, participantId, itemId) {
@@ -91,7 +92,7 @@ export async function castVote(boardId, participantId, itemId) {
     tx.update(participantRef, updatedParticipant);
     tx.update(voteRef, updatedVote);
 
-    return { remainingDots: updatedParticipant.remaining_dots, votes: updatedParticipant.votes };
+    return { remainingDots: updatedParticipant.remaining_dots, votes: updatedParticipant.votes, done: false };
   });
 }
 
@@ -111,4 +112,11 @@ export async function requestMoreDots(boardId, participantId) {
     tx.update(participantRef, { remaining_dots: updatedDots });
     return { remainingDots: updatedDots, votes: participant.votes || {} };
   });
+}
+
+// "I'm done voting" (true) or "Keep voting" (false). The facilitator sees the
+// done count with `mvote status`.
+export async function setDone(boardId, participantId, done) {
+  await updateDoc(doc(db, 'boards', boardId, 'participants', participantId), { done });
+  return done;
 }

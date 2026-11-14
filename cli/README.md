@@ -35,6 +35,8 @@ export GOOGLE_APPLICATION_CREDENTIALS=/path/to/serviceAccountKey.json
 
 The link uses a placeholder domain until you tell the tool where the web app lives. Pass `--base-url` or set `MVOTE_WEBAPP_URL`. Use `--qr-out path.png` to save the QR code as an image instead of printing it.
 
+During a session, `mvote status --board-id <id>` shows how many participants joined, how many tapped "I'm done voting", and how many dots are placed.
+
 When the session ends, close it to new votes and pull the results:
 
 ```bash
