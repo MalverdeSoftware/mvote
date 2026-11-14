@@ -129,13 +129,13 @@ describe('VotingBoard', () => {
 
     fireEvent.click(screen.getByText("I'm done voting"));
 
-    expect(await screen.findByText(/Thanks, your votes are in/)).toBeInTheDocument();
+    expect(await screen.findByText(/Thank you! Your votes are in/)).toBeInTheDocument();
     expect(voteButton).toBeDisabled();
     expect(screen.queryByText("I'm done voting")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByText('Keep voting'));
 
-    await waitFor(() => expect(screen.queryByText(/Thanks, your votes are in/)).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByText(/Thank you! Your votes are in/)).not.toBeInTheDocument());
     expect(voteButton).not.toBeDisabled();
     expect(screen.getByText("I'm done voting")).toBeInTheDocument();
   });
