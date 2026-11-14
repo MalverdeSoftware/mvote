@@ -35,11 +35,14 @@ export GOOGLE_APPLICATION_CREDENTIALS=/path/to/serviceAccountKey.json
 
 The link uses a placeholder domain until you tell the tool where the web app lives. Pass `--base-url` or set `MVOTE_WEBAPP_URL`. Use `--qr-out path.png` to save the QR code as an image instead of printing it.
 
-After participants have voted in the web app, pull the results:
+When the session ends, close it to new votes and pull the results:
 
 ```bash
+mvote close --board-id <id>
 mvote results --board-id <id> --out results.csv
 ```
+
+`mvote reopen --board-id <id>` lets a closed board take votes again. Closing and reopening rely on the `closed` check in `firestore.rules`, so deploy the current rules (`firebase deploy --only firestore:rules`) together with the current web app.
 
 ## Tests
 

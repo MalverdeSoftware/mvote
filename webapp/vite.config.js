@@ -11,6 +11,8 @@ export default defineConfig(({ mode }) => ({
     // resolve on its own, so Vite has to process them in tests too.
     server: { deps: { inline: [/@jetbrains\/ring-ui-built/] } },
     setupFiles: './src/test/setup.js',
+    // Rules tests need the Firestore emulator; they run with `npm run test:rules`.
+    exclude: ['node_modules/**', 'rules/**'],
     env: {
       VITE_USE_MOCK: 'true',
     },

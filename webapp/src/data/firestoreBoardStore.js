@@ -18,7 +18,14 @@ export async function loadBoard(boardId) {
     throw new Error(`Board '${boardId}' not found.`);
   }
   const data = snapshot.data();
-  return { boardId, title: data.title, items: data.items };
+  return { boardId, title: data.title, items: data.items, closed: Boolean(data.closed) };
+}
+
+// Calls back with true or false whenever the facilitator closes or reopens the board.
+export function subscribeBoardStatus(boardId, callback) {
+  return onSnapshot(doc(db, 'boards', boardId), (snapshot) => {
+    callback(Boolean(snapshot.data()?.closed));
+  }, () => {});
 }
 
 // onError is called if the live connection ends; Firestore stops the listener when that happens.
@@ -66,21 +73,23 @@ export async function castVote(boardId, participantId, itemId) {
     const currentCount = currentVoteData.count || 0;
     const currentParticipantVotes = participant.votes || {};
 
+    // last_item and last_voter let the security rules match the dot to the vote.
     const updatedParticipant = {
       remaining_dots: participant.remaining_dots - 1,
+      last_item: itemId,
       votes: {
         ...currentParticipantVotes,
         [itemId]: (currentParticipantVotes[itemId] || 0) + 1,
       },
     };
 
-    const updatedVote = { count: currentCount + 1 };
+    const updatedVote = { count: currentCount + 1, last_voter: participantId };
     if (TRACK_PARTICIPANT_COLORS) {
       updatedVote.placements = [...(currentVoteData.placements || []), participantId];
     }
 
     tx.update(participantRef, updatedParticipant);
-    tx.set(voteRef, updatedVote, { merge: true });
+    tx.update(voteRef, updatedVote);
 
     return { remainingDots: updatedParticipant.remaining_dots, votes: updatedParticipant.votes };
   });

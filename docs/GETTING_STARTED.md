@@ -39,16 +39,20 @@ This guide is for when you have a session coming up and want to know what to do.
 
 4. **Participants vote live.** Each person gets 8 dots and can put more than one on a favorite item. After they use all 8, they can ask for 4 more. Votes update in real time for everyone.
 
-5. **Pull the results when you're done:**
+5. **Close voting when the session ends,** then pull the results:
 
    ```bash
+   mvote close --board-id <board-id>
    mvote results --board-id <board-id> --out results.csv
    ```
+
+   Closing stops new votes, so the counts you export stay final even if the link keeps circulating. Participants still see the board, with a note that voting has ended. `mvote reopen --board-id <board-id>` lets it take votes again.
 
    You get one row per item with `board_id`, `board_title`, `item_id`, `label`, and `vote_count`, ready for a spreadsheet or your analysis code.
 
 ## Good to know
 
 - Board IDs are random 8-character strings unless you set one with `--board-id`. A memorable ID makes a more predictable link.
-- A session stays open until you stop sharing the link. There is no "close voting" button yet.
+- A session takes votes until you run `mvote close`.
+- Participants don't have accounts, so someone who clears their browser or switches devices gets a fresh set of dots. mVote is meant for sessions with a facilitator in the room.
 - You can run `results` again at any time. It gives the current tally, so it's safe to check on a session while it's running.

@@ -27,6 +27,9 @@ class FakeDocumentRef:
     def set(self, data):
         self._store[self._path] = dict(data)
 
+    def update(self, data):
+        self._store[self._path].update(data)
+
     def get(self):
         return FakeSnapshot(self._path[-1], self._store.get(self._path))
 
@@ -137,3 +140,29 @@ def test_export_board_results(tmp_path):
         {"board_id": "b1", "board_title": "Week 3", "item_id": "v2",
          "label": "Mood", "vote_count": 0},
     ]
+
+
+def test_save_board_starts_open(tmp_path):
+    db = FakeFirestoreClient()
+    config = tmp_path / "items.json"
+    config.write_text(json.dumps([{"id": "a", "label": "A"}]))
+    board = create_board(config, title="T", board_id="b1")
+    firebase_store.save_board(board, db=db)
+    assert db.collection("boards").document("b1").get().to_dict()["closed"] is False
+
+
+def test_set_board_closed_and_reopen(tmp_path):
+    db = FakeFirestoreClient()
+    config = tmp_path / "items.json"
+    config.write_text(json.dumps([{"id": "a", "label": "A"}]))
+    firebase_store.save_board(create_board(config, title="T", board_id="b1"), db=db)
+
+    firebase_store.set_board_closed("b1", True, db=db)
+    assert db.collection("boards").document("b1").get().to_dict()["closed"] is True
+    firebase_store.set_board_closed("b1", False, db=db)
+    assert db.collection("boards").document("b1").get().to_dict()["closed"] is False
+
+
+def test_set_board_closed_missing_board():
+    with pytest.raises(ValueError, match="not found"):
+        firebase_store.set_board_closed("nope", True, db=FakeFirestoreClient())
