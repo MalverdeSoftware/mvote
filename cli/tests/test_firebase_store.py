@@ -166,3 +166,26 @@ def test_set_board_closed_and_reopen(tmp_path):
 def test_set_board_closed_missing_board():
     with pytest.raises(ValueError, match="not found"):
         firebase_store.set_board_closed("nope", True, db=FakeFirestoreClient())
+
+
+def test_board_status_counts_participants_done_and_dots(tmp_path):
+    db = FakeFirestoreClient()
+    config = tmp_path / "items.json"
+    config.write_text(json.dumps([{"id": "a", "label": "A"}, {"id": "b", "label": "B"}]))
+    firebase_store.save_board(create_board(config, title="T", board_id="b1"), db=db)
+    board = db.collection("boards").document("b1")
+    board.collection("votes").document("a").set({"count": 5})
+    board.collection("votes").document("b").set({"count": 2})
+    board.collection("participants").document("p1").set({"remaining_dots": 1, "done": True})
+    board.collection("participants").document("p2").set({"remaining_dots": 8})
+    board.collection("participants").document("p3").set({"remaining_dots": 0, "done": False})
+
+    assert firebase_store.board_status("b1", db=db) == {
+        "closed": False, "participants": 3, "done": 1, "dots_placed": 7,
+    }
+
+
+def test_board_status_missing_board():
+    with pytest.raises(ValueError, match="not found"):
+        firebase_store.board_status("nope", db=FakeFirestoreClient())
+

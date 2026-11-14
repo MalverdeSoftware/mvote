@@ -37,7 +37,13 @@ This guide is for when you have a session coming up and want to know what to do.
 
 3. **Share the link or QR code.** Participants don't need an account or an app. A browser is enough.
 
-4. **Participants vote live.** Each person gets 8 dots and can put more than one on a favorite item. After they use all 8, they can ask for 4 more. Votes update in real time for everyone.
+4. **Participants vote live.** Each person gets 8 dots and can put more than one on a favorite item. After they use all 8, they can ask for 4 more. Votes update in real time for everyone. When someone has finished, they tap **I'm done voting**, which locks their voting until they tap **Keep voting**. To see how the room is doing:
+
+   ```bash
+   mvote status --board-id <board-id>
+   ```
+
+   It prints something like `9 of 13 participants done, 142 dots placed`, so you know when it's safe to close.
 
 5. **Close voting when the session ends,** then pull the results:
 

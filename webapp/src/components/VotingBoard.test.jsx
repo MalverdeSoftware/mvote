@@ -119,4 +119,33 @@ describe('VotingBoard', () => {
     await waitFor(() => expect(screen.queryByText(/This session is closed/)).not.toBeInTheDocument());
     expect(screen.getByLabelText('Add a dot to School connectedness')).not.toBeDisabled();
   });
+
+  it("locks voting with a thank-you when the participant is done, until they keep voting", async () => {
+    render(<VotingBoard boardId={uniqueBoardId()} />);
+    await screen.findByText('School connectedness');
+    const voteButton = screen.getByLabelText('Add a dot to School connectedness');
+    fireEvent.click(voteButton);
+    await waitFor(() => expect(screen.getByLabelText('7 dots left')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByText("I'm done voting"));
+
+    expect(await screen.findByText(/Thanks, your votes are in/)).toBeInTheDocument();
+    expect(voteButton).toBeDisabled();
+    expect(screen.queryByText("I'm done voting")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Keep voting'));
+
+    await waitFor(() => expect(screen.queryByText(/Thanks, your votes are in/)).not.toBeInTheDocument());
+    expect(voteButton).not.toBeDisabled();
+    expect(screen.getByText("I'm done voting")).toBeInTheDocument();
+  });
+
+  it('hides the done button once the session is closed', async () => {
+    const boardId = uniqueBoardId();
+    render(<VotingBoard boardId={boardId} />);
+    await screen.findByText("I'm done voting");
+    act(() => setBoardClosed(boardId, true));
+    await screen.findByText(/This session is closed/);
+    expect(screen.queryByText("I'm done voting")).not.toBeInTheDocument();
+  });
 });

@@ -20,13 +20,15 @@ beforeAll(async () => {
 
 afterAll(() => env.cleanup());
 
-async function seed({ closed = false, dots = 8, votes = {} } = {}) {
+async function seed({ closed = false, dots = 8, votes = {}, done } = {}) {
   await env.withSecurityRulesDisabled(async (context) => {
     const admin = context.firestore();
     await setDoc(doc(admin, 'boards', BOARD), { title: 'T', items: [], closed });
     await setDoc(doc(admin, 'boards', BOARD, 'votes', 'a'), { count: 0 });
     await setDoc(doc(admin, 'boards', BOARD, 'votes', 'b'), { count: 0 });
-    await setDoc(doc(admin, 'boards', BOARD, 'participants', 'p1'), { remaining_dots: dots, votes });
+    await setDoc(doc(admin, 'boards', BOARD, 'participants', 'p1'), {
+      remaining_dots: dots, votes, ...(done === undefined ? {} : { done }),
+    });
   });
 }
 
@@ -124,6 +126,32 @@ describe('a closed board', () => {
     await seed({ closed: true });
     await env.withSecurityRulesDisabled((c) => updateDoc(doc(c.firestore(), 'boards', BOARD), { closed: false }));
     await assertSucceeds(castVote('a'));
+  });
+});
+
+describe("I'm done voting", () => {
+  it('lets a participant mark themselves done and then keep voting', async () => {
+    await seed();
+    await assertSucceeds(updateDoc(participant(), { done: true }));
+    await assertSucceeds(updateDoc(participant(), { done: false }));
+    await assertSucceeds(castVote('a'));
+  });
+
+  it('refuses votes and extra dots while done', async () => {
+    await seed({ done: true });
+    await assertFails(castVote('a'));
+    await env.withSecurityRulesDisabled((c) => updateDoc(doc(c.firestore(), 'boards', BOARD, 'participants', 'p1'), { remaining_dots: 0 }));
+    await assertFails(updateDoc(participant(), { remaining_dots: 4 }));
+  });
+
+  it('refuses a done change that also changes dots', async () => {
+    await seed();
+    await assertFails(updateDoc(participant(), { done: true, remaining_dots: 20 }));
+  });
+
+  it('refuses a done value that is not true or false', async () => {
+    await seed();
+    await assertFails(updateDoc(participant(), { done: 'yes' }));
   });
 });
 

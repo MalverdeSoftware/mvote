@@ -7,7 +7,7 @@ import LoaderInline from '@jetbrains/ring-ui-built/components/loader-inline/load
 import ProgressBar from '@jetbrains/ring-ui-built/components/progress-bar/progress-bar';
 import Text from '@jetbrains/ring-ui-built/components/text/text';
 import {
-  castVote, joinParticipant, loadBoard, requestMoreDots, subscribeBoardStatus, subscribeVotes,
+  castVote, joinParticipant, loadBoard, requestMoreDots, setDone, subscribeBoardStatus, subscribeVotes,
 } from '../data/index.js';
 import { getParticipantId } from '../participantId.js';
 import ItemCard from './ItemCard.jsx';
@@ -91,6 +91,12 @@ export default function VotingBoard({ boardId }) {
       setParticipant((prev) => ({ ...prev, remainingDots: updated.remainingDots }));
     });
 
+  const handleDone = (done) =>
+    runWrite(async (participantId) => {
+      await setDone(boardId, participantId, done);
+      setParticipant((prev) => ({ ...prev, done }));
+    });
+
   if (error && !loaded) {
     return (
       <main className="page-centered">
@@ -119,6 +125,7 @@ export default function VotingBoard({ boardId }) {
   const dotsLeftText = `${participant.remainingDots === 1 ? 'dot' : 'dots'} left`;
   const dotsPlaced = Object.values(participant.votes).reduce((sum, n) => sum + n, 0);
   const totalDots = dotsPlaced + participant.remainingDots;
+  const done = Boolean(participant.done);
 
   return (
     <main className="voting-board">
@@ -134,7 +141,7 @@ export default function VotingBoard({ boardId }) {
             <span aria-hidden="true">{dotsLeftText}</span>
           </div>
         </div>
-        {participant.remainingDots <= 0 && !closed && (
+        {participant.remainingDots <= 0 && !closed && !done && (
           <Button
             primary
             height={ControlsHeight.L}
@@ -143,6 +150,16 @@ export default function VotingBoard({ boardId }) {
             disabled={pending}
           >
             Request more dots (+4)
+          </Button>
+        )}
+        {!closed && !done && (
+          <Button
+            height={ControlsHeight.L}
+            className="touch-button voting-board__done"
+            onClick={() => handleDone(true)}
+            disabled={pending}
+          >
+            I'm done voting
           </Button>
         )}
         <ProgressBar
@@ -155,7 +172,16 @@ export default function VotingBoard({ boardId }) {
 
       {closed && (
         <div role="status" className="voting-board__error">
-          <Banner mode="info" withIcon>This session is closed. Voting has ended; the counts below are final.</Banner>
+          <Banner mode="info" withIcon>This session is closed. Voting has ended. The counts below are final.</Banner>
+        </div>
+      )}
+
+      {done && !closed && (
+        <div role="status" className="voting-board__error">
+          <Banner mode="success" withIcon>
+            Thanks, your votes are in.{' '}
+            <Button inline onClick={() => handleDone(false)} disabled={pending}>Keep voting</Button>
+          </Banner>
         </div>
       )}
 
@@ -169,7 +195,7 @@ export default function VotingBoard({ boardId }) {
             voteCount={votes[item.id]?.count || 0}
             placements={votes[item.id]?.placements}
             yourVotes={participant.votes[item.id] || 0}
-            disabled={closed || participant.remainingDots <= 0 || pending}
+            disabled={closed || done || participant.remainingDots <= 0 || pending}
             onVote={() => handleVote(item.id)}
           />
         ))}

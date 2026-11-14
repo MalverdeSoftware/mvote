@@ -18,6 +18,7 @@ from .config import Item
 
 BOARDS_COLLECTION = "boards"
 VOTES_SUBCOLLECTION = "votes"
+PARTICIPANTS_SUBCOLLECTION = "participants"
 
 
 def get_client() -> Any:
@@ -91,6 +92,31 @@ def set_board_closed(board_id: str, closed: bool, db: Any = None) -> None:
     if not board_ref.get().exists:
         raise ValueError(f"Board '{board_id}' not found.")
     board_ref.update({"closed": closed})
+
+
+def board_status(board_id: str, db: Any = None) -> dict:
+    """Summarize a live board for the facilitator.
+
+    Returns ``closed``, ``participants`` (how many joined), ``done`` (how
+    many tapped "I'm done voting") and ``dots_placed`` (all votes so far).
+
+    Raises:
+        ValueError: if no board with this id exists.
+    """
+    db = db or get_client()
+    board_ref = db.collection(BOARDS_COLLECTION).document(board_id)
+    snapshot = board_ref.get()
+    if not snapshot.exists:
+        raise ValueError(f"Board '{board_id}' not found.")
+    participants = [
+        doc.to_dict() or {} for doc in board_ref.collection(PARTICIPANTS_SUBCOLLECTION).stream()
+    ]
+    return {
+        "closed": bool((snapshot.to_dict() or {}).get("closed", False)),
+        "participants": len(participants),
+        "done": sum(1 for p in participants if p.get("done")),
+        "dots_placed": sum(fetch_vote_counts(board_id, db=db).values()),
+    }
 
 
 def load_board(board_id: str, db: Any = None) -> Board:

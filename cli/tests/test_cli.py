@@ -135,3 +135,14 @@ def test_close_missing_board_exits_nonzero(monkeypatch):
     result = CliRunner().invoke(main, ["close", "--board-id", "nope"])
     assert result.exit_code == 1
     assert "not found" in result.output
+
+
+def test_status_prints_summary(monkeypatch):
+    monkeypatch.setattr(
+        "mvote.cli.firebase_store.board_status",
+        lambda board_id, db=None: {"closed": False, "participants": 13, "done": 9, "dots_placed": 142},
+    )
+    result = CliRunner().invoke(main, ["status", "--board-id", "b1"])
+    assert result.exit_code == 0
+    assert "is open: 9 of 13 participants done, 142 dots placed." in result.output
+
