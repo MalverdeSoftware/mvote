@@ -12,4 +12,4 @@ Please don't open a public issue for a security problem. Report it privately thr
 
 You'll get an acknowledgment within 7 days. Fixes for confirmed problems ship in a new release, and the advisory is published once a fix is available, with credit to the reporter unless you'd rather not be named.
 
-Never include real participant data, session key files, management keys or passcodes in a report. Use synthetic sessions.
+Never include real participant data, credentials or other secrets in a report. Use synthetic boards.
