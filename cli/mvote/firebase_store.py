@@ -64,6 +64,7 @@ def save_board(board: Board, db: Any = None, overwrite: bool = False) -> None:
             "title": board.title,
             "created_at": board.created_at,
             "metadata": board.metadata,
+            "closed": False,
             "items": [
                 {"id": item.id, "label": item.label, "description": item.description}
                 for item in board.items
@@ -73,6 +74,23 @@ def save_board(board: Board, db: Any = None, overwrite: bool = False) -> None:
     votes_ref = board_ref.collection(VOTES_SUBCOLLECTION)
     for item in board.items:
         votes_ref.document(item.id).set({"count": 0})
+
+
+def set_board_closed(board_id: str, closed: bool, db: Any = None) -> None:
+    """Close a board to new votes, or reopen it.
+
+    A closed board still shows its counts, and ``mvote results`` still
+    exports them. The security rules refuse new participants, votes and
+    extra dots while ``closed`` is true.
+
+    Raises:
+        ValueError: if no board with this id exists.
+    """
+    db = db or get_client()
+    board_ref = db.collection(BOARDS_COLLECTION).document(board_id)
+    if not board_ref.get().exists:
+        raise ValueError(f"Board '{board_id}' not found.")
+    board_ref.update({"closed": closed})
 
 
 def load_board(board_id: str, db: Any = None) -> Board:

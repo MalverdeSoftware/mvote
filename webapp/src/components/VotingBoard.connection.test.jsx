@@ -60,6 +60,17 @@ describe('VotingBoard when the connection fails', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Could not join.');
   });
 
+  it('shows a closed board read-only when a newcomer is refused a place', async () => {
+    loadBoard.mockResolvedValue({ ...BOARD, closed: true });
+    joinParticipant.mockRejectedValue(new Error('Missing or insufficient permissions.'));
+    render(<VotingBoard boardId="b" />);
+
+    await act(async () => {});
+    expect(screen.getByText(/This session is closed/)).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('0 dots left')).toBeInTheDocument();
+  });
+
   it('says so when the live vote counts stop updating', async () => {
     let failSubscription;
     loadBoard.mockResolvedValue(BOARD);

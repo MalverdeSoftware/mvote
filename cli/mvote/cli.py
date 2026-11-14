@@ -115,6 +115,32 @@ def results(board_id: str, out_path: str | None):
         _write_results(sys.stdout, rows)
 
 
+@main.command("close")
+@click.option("--board-id", required=True, help="Id of a published board.")
+def close(board_id: str):
+    """Stop a board from taking votes. Its counts stay visible and exportable."""
+    _set_closed(board_id, True)
+
+
+@main.command("reopen")
+@click.option("--board-id", required=True, help="Id of a closed board.")
+def reopen(board_id: str):
+    """Let a closed board take votes again."""
+    _set_closed(board_id, False)
+
+
+def _set_closed(board_id: str, closed: bool) -> None:
+    try:
+        firebase_store.set_board_closed(board_id, closed)
+    except ValueError as e:
+        click.echo(str(e), err=True)
+        sys.exit(1)
+    if closed:
+        click.echo(f"Board '{board_id}' is closed. Participants can see the counts but can't vote.")
+    else:
+        click.echo(f"Board '{board_id}' is open for voting again.")
+
+
 def _write_results(stream, rows: list[dict]) -> None:
     writer = csv.DictWriter(stream, fieldnames=RESULT_FIELDS)
     writer.writeheader()

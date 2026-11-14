@@ -109,3 +109,29 @@ def test_results_missing_board_exits_nonzero(monkeypatch):
 
     assert result.exit_code == 1
     assert "not found" in result.output
+
+
+def test_close_and_reopen_call_the_store(monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        "mvote.cli.firebase_store.set_board_closed",
+        lambda board_id, closed, db=None: calls.append((board_id, closed)),
+    )
+    runner = CliRunner()
+
+    closed = runner.invoke(main, ["close", "--board-id", "b1"])
+    reopened = runner.invoke(main, ["reopen", "--board-id", "b1"])
+
+    assert closed.exit_code == 0 and "is closed" in closed.output
+    assert reopened.exit_code == 0 and "open for voting again" in reopened.output
+    assert calls == [("b1", True), ("b1", False)]
+
+
+def test_close_missing_board_exits_nonzero(monkeypatch):
+    def raise_not_found(board_id, closed, db=None):
+        raise ValueError(f"Board '{board_id}' not found.")
+
+    monkeypatch.setattr("mvote.cli.firebase_store.set_board_closed", raise_not_found)
+    result = CliRunner().invoke(main, ["close", "--board-id", "nope"])
+    assert result.exit_code == 1
+    assert "not found" in result.output

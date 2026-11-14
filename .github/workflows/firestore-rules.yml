@@ -1,0 +1,30 @@
+# Runs webapp/rules/*.test.js against firestore.rules in the Firestore emulator.
+name: Firestore rules
+on:
+  push:
+    paths: ['firestore.rules', 'firebase.json', 'webapp/rules/**', 'webapp/vitest.rules.config.js', 'webapp/package-lock.json', '.github/workflows/firestore-rules.yml']
+  pull_request:
+    paths: ['firestore.rules', 'firebase.json', 'webapp/rules/**', 'webapp/vitest.rules.config.js', 'webapp/package-lock.json', '.github/workflows/firestore-rules.yml']
+permissions:
+  contents: read
+jobs:
+  rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: webapp
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: webapp/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: npm ci
+      - run: npm install --no-save firebase-tools@14
+      - run: PATH="$PWD/node_modules/.bin:$PATH" npm run test:rules

@@ -1,5 +1,6 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { setBoardClosed } from '../data/mockBoardStore.js';
 import VotingBoard from './VotingBoard.jsx';
 
 function uniqueBoardId() {
@@ -90,5 +91,32 @@ describe('VotingBoard', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Hide description of Self-efficacy' }));
     expect(description).not.toBeVisible();
+  });
+
+  it('locks voting with a notice when the facilitator closes the session', async () => {
+    const boardId = uniqueBoardId();
+    render(<VotingBoard boardId={boardId} />);
+    await screen.findByText('School connectedness');
+    const voteButton = screen.getByLabelText('Add a dot to School connectedness');
+    expect(voteButton).not.toBeDisabled();
+
+    act(() => setBoardClosed(boardId, true));
+
+    expect(await screen.findByText(/This session is closed/)).toBeInTheDocument();
+    expect(voteButton).toBeDisabled();
+    expect(screen.getByLabelText('8 dots left')).toBeInTheDocument();
+  });
+
+  it('unlocks voting again when the session is reopened', async () => {
+    const boardId = uniqueBoardId();
+    render(<VotingBoard boardId={boardId} />);
+    await screen.findByText('School connectedness');
+    act(() => setBoardClosed(boardId, true));
+    await screen.findByText(/This session is closed/);
+
+    act(() => setBoardClosed(boardId, false));
+
+    await waitFor(() => expect(screen.queryByText(/This session is closed/)).not.toBeInTheDocument());
+    expect(screen.getByLabelText('Add a dot to School connectedness')).not.toBeDisabled();
   });
 });

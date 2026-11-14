@@ -3,17 +3,21 @@ rules_version = '2';
 // Security rules for the mVote webapp's no-account, anonymous
 // voting flow. Deploy with: firebase deploy --only firestore:rules
 //
-// Known limitation (accepted for v1): these rules validate each document's
-// own write in isolation. A technically sophisticated participant could in
-// principle call Firestore directly to increment a votes/{itemId}.count
-// without spending a matching dot from their own participant doc, since
-// there's no cross-document atomicity check tying the two together. This
-// is judged an acceptable risk for a supervised classroom/CBPR session
-// with known, well-intentioned participants — not a public, adversarial
-// deployment. A stronger guarantee would require moving vote-casting into
-// a trusted Cloud Function, which needs Firebase's Blaze (pay-as-you-go)
-// plan; not pursued here to keep this within Firebase's free tier per the
-// project's stated cost goals (see docs/ROADMAP.md decision log).
+// Casting a vote writes two documents in one transaction: the participant
+// spends a dot (participants/{id}) and the item's count goes up by one
+// (votes/{itemId}). Each document's rule uses getAfter() to check that the
+// other document changes to match in the same write, so a vote can't be
+// added without spending a dot, and a dot can't be spent without adding the
+// vote. The participant records which item it voted for (last_item) and the
+// vote records who voted (last_voter) so each side can find the other.
+//
+// A board with closed: true (set by `mvote close`) takes no new
+// participants, votes or extra dots. Reading stays open, so the final counts
+// still show.
+//
+// Remaining limitation: participants have no accounts, so someone who clears
+// their browser storage or uses another device starts with fresh dots. mVote
+// is meant for sessions with a facilitator in the room.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -26,6 +30,10 @@ service cloud.firestore {
       allow list: if false;
       allow write: if false;
 
+      function boardOpen() {
+        return get(/databases/$(database)/documents/boards/$(boardId)).data.get('closed', false) == false;
+      }
+
       match /votes/{itemId} {
         // Vote docs are pre-created (count: 0) by the CLI when a board is
         // published. Clients may only increment an existing item's count
@@ -33,9 +41,22 @@ service cloud.firestore {
         // or set an arbitrary value.
         allow read: if true;
         allow create, delete: if false;
-        allow update: if request.resource.data.count == resource.data.count + 1
+        allow update: if boardOpen()
+                       && request.resource.data.count == resource.data.count + 1
                        && request.resource.data.diff(resource.data).affectedKeys()
-                            .hasOnly(['count', 'placements']);
+                            .hasOnly(['count', 'placements', 'last_voter'])
+                       && request.resource.data.last_voter is string
+                       && spentDotOn(request.resource.data.last_voter, itemId);
+
+        // The named participant spends exactly one dot on this item in the same write.
+        function spentDotOn(participantId, itemId) {
+          let path = /databases/$(database)/documents/boards/$(boardId)/participants/$(participantId);
+          let before = get(path).data;
+          let after = getAfter(path).data;
+          return after.remaining_dots == before.remaining_dots - 1
+                 && after.get('last_item', null) == itemId
+                 && after.votes.get(itemId, 0) == before.votes.get(itemId, 0) + 1;
+        }
       }
 
       match /participants/{participantId} {
@@ -50,20 +71,33 @@ service cloud.firestore {
         // once empty.
         allow get: if true;
         allow list: if false;
-        allow create: if request.resource.data.remaining_dots == 8
-                       && request.resource.data.votes == {};
-        allow update: if isDotSpend() || isReup();
+        allow create: if boardOpen()
+                       && request.resource.data.remaining_dots == 8
+                       && request.resource.data.votes == {}
+                       && request.resource.data.keys().hasOnly(['remaining_dots', 'votes']);
+        allow update: if boardOpen() && (isDotSpend() || isReup());
         allow delete: if false;
 
+        // One dot goes to one item, and that item's count goes up by one in
+        // the same write, recorded as this participant's vote.
         function isDotSpend() {
-          return resource.data.remaining_dots > 0
-                 && request.resource.data.remaining_dots == resource.data.remaining_dots - 1;
+          let item = request.resource.data.last_item;
+          let votePath = /databases/$(database)/documents/boards/$(boardId)/votes/$(item);
+          return item is string
+                 && resource.data.remaining_dots > 0
+                 && request.resource.data.remaining_dots == resource.data.remaining_dots - 1
+                 && request.resource.data.diff(resource.data).affectedKeys()
+                      .hasOnly(['remaining_dots', 'votes', 'last_item'])
+                 && request.resource.data.votes.diff(resource.data.votes).affectedKeys().hasOnly([item])
+                 && request.resource.data.votes[item] == resource.data.votes.get(item, 0) + 1
+                 && getAfter(votePath).data.count == get(votePath).data.count + 1
+                 && getAfter(votePath).data.get('last_voter', null) == participantId;
         }
 
         function isReup() {
           return resource.data.remaining_dots == 0
                  && request.resource.data.remaining_dots == 4
-                 && request.resource.data.votes == resource.data.votes;
+                 && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['remaining_dots']);
         }
       }
     }

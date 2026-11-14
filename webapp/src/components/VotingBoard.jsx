@@ -6,7 +6,9 @@ import { H1 } from '@jetbrains/ring-ui-built/components/heading/heading';
 import LoaderInline from '@jetbrains/ring-ui-built/components/loader-inline/loader-inline';
 import ProgressBar from '@jetbrains/ring-ui-built/components/progress-bar/progress-bar';
 import Text from '@jetbrains/ring-ui-built/components/text/text';
-import { castVote, joinParticipant, loadBoard, requestMoreDots, subscribeVotes } from '../data/index.js';
+import {
+  castVote, joinParticipant, loadBoard, requestMoreDots, subscribeBoardStatus, subscribeVotes,
+} from '../data/index.js';
 import { getParticipantId } from '../participantId.js';
 import ItemCard from './ItemCard.jsx';
 
@@ -21,6 +23,7 @@ export default function VotingBoard({ boardId }) {
   const [error, setError] = useState(null);
   const [pending, setPending] = useState(false);
   const [connectionSlow, setConnectionSlow] = useState(false);
+  const [closed, setClosed] = useState(false);
   const loaded = Boolean(board && participant);
   // A ref, not just the `pending` state: two writes dispatched in the same
   // tick (e.g. a very fast double-tap) can both run before React re-renders
@@ -32,17 +35,27 @@ export default function VotingBoard({ boardId }) {
   useEffect(() => {
     const participantId = getParticipantId(boardId);
 
+    // A closed board takes no new participants, so someone opening it for
+    // the first time just sees the counts, with no dots of their own.
     loadBoard(boardId)
-      .then(setBoard)
-      .catch((e) => setError(e.message));
-
-    joinParticipant(boardId, participantId)
+      .then((loadedBoard) => {
+        setBoard(loadedBoard);
+        setClosed(loadedBoard.closed);
+        return joinParticipant(boardId, participantId).catch((e) => {
+          if (loadedBoard.closed) return { remainingDots: 0, votes: {} };
+          throw e;
+        });
+      })
       .then(setParticipant)
       .catch((e) => setError(e.message));
 
+    const unsubscribeStatus = subscribeBoardStatus(boardId, setClosed);
     const unsubscribe = subscribeVotes(boardId, setVotes, () =>
       setError('The live vote counts stopped updating. Reload this page to see the latest.'));
-    return unsubscribe;
+    return () => {
+      unsubscribe?.();
+      unsubscribeStatus?.();
+    };
   }, [boardId]);
 
   useEffect(() => {
@@ -121,7 +134,7 @@ export default function VotingBoard({ boardId }) {
             <span aria-hidden="true">{dotsLeftText}</span>
           </div>
         </div>
-        {participant.remainingDots <= 0 && (
+        {participant.remainingDots <= 0 && !closed && (
           <Button
             primary
             height={ControlsHeight.L}
@@ -140,7 +153,13 @@ export default function VotingBoard({ boardId }) {
         />
       </header>
 
-      {error && <div role="alert" className="voting-board__error"><Banner mode="error" withIcon>{error}</Banner></div>}
+      {closed && (
+        <div role="status" className="voting-board__error">
+          <Banner mode="info" withIcon>This session is closed. Voting has ended; the counts below are final.</Banner>
+        </div>
+      )}
+
+      {error && !closed && <div role="alert" className="voting-board__error"><Banner mode="error" withIcon>{error}</Banner></div>}
 
       <div className="item-grid">
         {board.items.map((item) => (
@@ -150,7 +169,7 @@ export default function VotingBoard({ boardId }) {
             voteCount={votes[item.id]?.count || 0}
             placements={votes[item.id]?.placements}
             yourVotes={participant.votes[item.id] || 0}
-            disabled={participant.remainingDots <= 0 || pending}
+            disabled={closed || participant.remainingDots <= 0 || pending}
             onVote={() => handleVote(item.id)}
           />
         ))}

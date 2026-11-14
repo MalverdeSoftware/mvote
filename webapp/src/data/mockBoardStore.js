@@ -15,6 +15,7 @@ const DEMO_ITEMS = [
 const boards = new Map();
 const participants = new Map();
 const voteListeners = new Map();
+const statusListeners = new Map();
 
 function participantKey(boardId, participantId) {
   return `${boardId}:${participantId}`;
@@ -29,6 +30,7 @@ function ensureBoard(boardId) {
       title: 'Demo board (mock data)',
       items: DEMO_ITEMS,
       votes,
+      closed: false,
     });
   }
   return boards.get(boardId);
@@ -42,7 +44,26 @@ function notifyVoteListeners(boardId) {
 
 export async function loadBoard(boardId) {
   const board = ensureBoard(boardId);
-  return { boardId: board.boardId, title: board.title, items: board.items };
+  return { boardId: board.boardId, title: board.title, items: board.items, closed: board.closed };
+}
+
+export function subscribeBoardStatus(boardId, callback) {
+  if (!statusListeners.has(boardId)) statusListeners.set(boardId, []);
+  statusListeners.get(boardId).push(callback);
+  callback(ensureBoard(boardId).closed);
+  return () => {
+    statusListeners.set(boardId, statusListeners.get(boardId).filter((cb) => cb !== callback));
+  };
+}
+
+// Stands in for `mvote close` / `mvote reopen` in tests and the local demo.
+export function setBoardClosed(boardId, closed) {
+  ensureBoard(boardId).closed = closed;
+  for (const cb of statusListeners.get(boardId) || []) cb(closed);
+}
+
+function assertOpen(boardId) {
+  if (ensureBoard(boardId).closed) throw new Error('This session is closed.');
 }
 
 export function subscribeVotes(boardId, callback) {
@@ -63,7 +84,7 @@ export async function joinParticipant(boardId, participantId) {
 }
 
 export async function castVote(boardId, participantId, itemId) {
-  ensureBoard(boardId);
+  assertOpen(boardId);
   const key = participantKey(boardId, participantId);
   const participant = participants.get(key);
   if (!participant || participant.remainingDots <= 0) {
@@ -81,6 +102,7 @@ export async function castVote(boardId, participantId, itemId) {
 }
 
 export async function requestMoreDots(boardId, participantId) {
+  assertOpen(boardId);
   const key = participantKey(boardId, participantId);
   const participant = participants.get(key);
   if (!participant || participant.remainingDots > 0) {
