@@ -179,7 +179,7 @@ export default function VotingBoard({ boardId }) {
       {done && !closed && (
         <div role="status" className="voting-board__error">
           <Banner mode="success" withIcon>
-            Thanks, your votes are in.{' '}
+            Thank you! Your votes are in.{' '}
             <Button inline onClick={() => handleDone(false)} disabled={pending}>Keep voting</Button>
           </Banner>
         </div>
