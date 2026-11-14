@@ -1,5 +1,7 @@
 # mVote
 
+[![PyPI](https://img.shields.io/pypi/v/mvote)](https://pypi.org/project/mvote/) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24206726.svg)](https://doi.org/10.5281/zenodo.24206726) [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE) [![CLI tests](https://github.com/MalverdeSoftware/mvote/actions/workflows/cli-tests.yml/badge.svg)](https://github.com/MalverdeSoftware/mvote/actions/workflows/cli-tests.yml)
+
 mVote is a no-account sticky-note voting tool for research and community-based participatory research (CBPR). I built it so a group can vote on a list of items, like candidate survey variables from a codebook, and I can leave with a clean dataset instead of a photo of a whiteboard.
 
 Participants open a link or scan a QR code. They don't make an account. They place dots on the items they care about, and the votes update live for everyone. Results export as a table with one row per item and its vote count.
