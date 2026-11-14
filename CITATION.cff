@@ -12,9 +12,9 @@ authors:
     orcid: "https://orcid.org/0000-0002-9035-8094"
   - family-names: "Ledesma"
     given-names: "Marissa"
-version: "0.1.0"
+version: "0.2.0"
 doi: 10.5281/zenodo.24206726
-date-released: "2026-11-13"
+date-released: "2026-11-14"
 license: Apache-2.0
 repository-code: "https://github.com/MalverdeSoftware/mvote"
 url: "https://mvote.app"
