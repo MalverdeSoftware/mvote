@@ -13,11 +13,11 @@ Most voting tools were made for business brainstorming. For research, that gets 
 ## Run a session
 
 ```bash
-pip install "git+https://github.com/MalverdeSoftware/mvote.git#subdirectory=cli"
+pip install mvote
 mvote create --config items.json --title "Week 3" --publish
 ```
 
-That prints a link and a QR code to share. The [getting started guide](docs/GETTING_STARTED.md) walks through the item file format, running the session, and exporting results.
+That prints a link and a QR code to share. The command line tool is [on PyPI](https://pypi.org/project/mvote/). To try changes that haven't been released yet, install it from GitHub with `pip install "git+https://github.com/MalverdeSoftware/mvote.git#subdirectory=cli"`. The [getting started guide](docs/GETTING_STARTED.md) walks through the item file format, running the session, and exporting results.
 
 ## What's in this repo
 
