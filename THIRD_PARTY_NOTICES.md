@@ -48,10 +48,6 @@ The one without a license field is **scrollbar-width** 3.1.1. Its own LICENSE fi
 | `qrcode` (with `pillow` for images) | BSD; Pillow is MIT-CMU |
 | `firebase-admin` | Apache-2.0. Using Firebase services is also governed by Google's terms |
 
-## Demo (`demos/nov4-iwfp-talk/`)
-
-`numpy` (BSD-3-Clause, with parts under 0BSD, MIT, Zlib and CC0-1.0), `pandas`, `scikit-learn`, and scikit-learn's dependencies `scipy`, `joblib` and `threadpoolctl` (all BSD-3-Clause).
-
 ## Keeping this current
 
 This file is regenerated when dependencies change. If you find a missing or wrong attribution, please [open an issue](https://github.com/MalverdeSoftware/mvote/issues).
