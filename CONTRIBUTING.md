@@ -6,7 +6,7 @@ mVote is licensed under the [Apache License 2.0](LICENSE). Under Section 5 of th
 
 ## Ways to help
 
-- **Bug reports and feature ideas:** open a GitHub issue. For a bug, tell me how to reproduce it. For a feature, describe what you were trying to do, especially if it's a CBPR or research workflow mVote doesn't handle well yet.
+- **Bug reports and feature ideas:** open a GitHub issue. For a bug, include the steps to reproduce it. For a feature, describe what you were trying to do, especially if it's a CBPR or research workflow mVote doesn't handle well yet.
 - **Code:** fork the repo, make a branch, and open a pull request against `main`. Please add or update tests when behavior changes.
 - **Documentation:** the README, the docs folder, and the example files are all open to edits.
 

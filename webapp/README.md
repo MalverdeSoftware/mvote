@@ -57,7 +57,7 @@ Tests run against the in-memory mock store (`src/data/mockBoardStore.js`), so th
 
 ## Deployment
 
-mVote runs as a Cloudflare Worker that serves the static files (see `../wrangler.jsonc` at the repo root). I chose it over Firebase Hosting because my domain (delasierra.io) already lives in Cloudflare, which avoids the SSL certificate conflicts that can come from running Firebase Hosting behind Cloudflare's proxy. Firestore stays the backend wherever the static site is hosted.
+mVote runs as a Cloudflare Worker that serves the static files (see `../wrangler.jsonc` at the repo root). Cloudflare hosts the project's domains, so serving the site from a Worker avoids the SSL certificate conflicts that can come from running Firebase Hosting behind Cloudflare's proxy. Firestore stays the backend wherever the static site is hosted.
 
 Live at:
 
