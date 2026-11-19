@@ -1,4 +1,4 @@
-# Release workflow for the mvote command-line tool (SPEC-distribution in MalverdeSoftware/malverdesoftware).
+# Release workflow for the mvote command-line tool (SPEC-distribution in MalverdeSoftware/mbolts).
 # Every run builds the sdist and wheel, runs `twine check --strict` and scripts/check-cli-release.py,
 # installs the wheel, and keeps the files as an artifact. A tag `v<version>` also publishes to PyPI
 # through trusted publishing (OIDC) in the `pypi` environment; no token is stored. The upload runs
