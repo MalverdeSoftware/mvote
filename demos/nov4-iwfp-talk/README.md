@@ -24,8 +24,7 @@ and the board kept the name `nov4-talk`.
   the model's result table.
 
 The model ran in the notebook in the public IWFP repo (`live_vote_demo/`), which
-keeps the saved run as a public example while this repo is private. When this repo
-goes public, move the saved run here and leave a link behind. These files hold
+keeps the saved run as a public example. These files hold
 per-item totals only. The board also keeps one record per participant, with that
 person's votes and remaining dots; those aren't copied here. See `REHEARSAL-LOG.md`
 for the outcome.
