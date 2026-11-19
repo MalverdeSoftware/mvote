@@ -23,8 +23,8 @@ and the board kept the name `nov4-talk`.
 - [`nov5-lab-run/nov5_lab_model_results.csv`](nov5-lab-run/nov5_lab_model_results.csv):
   the model's result table.
 
-The model ran in the notebook in the public IWFP repo (`live_vote_demo/`), which
-keeps the saved run as a public example. These files hold
+The model ran in the notebook in the public IWFP repo (`live_vote_demo/`). The saved
+run and the talk record are in [`talks/2026-11-05-aim-ahead-lab/`](https://github.com/vqsierra/IWFP/tree/main/talks/2026-11-05-aim-ahead-lab). These files hold
 per-item totals only. The board also keeps one record per participant, with that
 person's votes and remaining dots; those aren't copied here. See `REHEARSAL-LOG.md`
 for the outcome.

@@ -16,7 +16,7 @@ This is the official record of the session, run on the board `p4he-nov19`.
 - [`nov19-run/nov19_p4he_votes.csv`](nov19-run/nov19_p4he_votes.csv): the room's dots per factor. 207 dots, and all 25 factors got at least one.
 - [`nov19-run/nov19_p4he_model_results.csv`](nov19-run/nov19_p4he_model_results.csv): the model's result table. It kept 14 of the 25 factors (6 higher risk, 6 protective, 2 weak or unstable), with a cross-validated AUC of 0.89 (0.87 to 0.91). All modeling used synthetic data.
 
-The saved notebook run is public in the IWFP repo as `live_vote_demo/P4HE_live_vote_demo_nov19-2026_run.ipynb` (vqsierra/IWFP#20). The talk's public record, with event details and the recording link once P4HE posts it, is [`talks/2026-11-19-p4he/`](https://github.com/vqsierra/IWFP/tree/main/talks/2026-11-19-p4he) in IWFP. These files hold per-factor totals only. The board's per-participant records aren't copied here.
+The saved notebook run and the talk's public record, with event details and the recording link once P4HE posts it, are in [`talks/2026-11-19-p4he/`](https://github.com/vqsierra/IWFP/tree/main/talks/2026-11-19-p4he) in IWFP. These files hold per-factor totals only. The board's per-participant records aren't copied here.
 
 ## Board settings
 
