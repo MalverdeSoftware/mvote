@@ -19,7 +19,7 @@ This is where mVote stands and what comes next.
 - [ ] Review and finalize the statement of need
 - [x] Add the Apache-2.0 LICENSE, NOTICE with the funding acknowledgment, and `CITATION.cff` (2026-11-12)
 - [x] Mint a DOI at the first public release and add it to NOTICE, CITATION.cff and the README (Zenodo, 10.5281/zenodo.24206726)
-- [x] Use mVote in a real class or CBPR session: the AIHEC AMC lab on 2026-11-05, with 13 participants and 177 dots (VOTE-3)
+- [x] Use mVote in a real research session (first used at an AIM-AHEAD AIHEC AMC workshop on 2026-11-05)
 - [ ] Tag releases as features land (v0.1.0 on 2026-11-13, v0.2.0 on 2026-11-14)
 - [ ] Transfer the PyPI project to the MalverdeSoftware organization once PyPI approves it
 - [x] Close a session to new votes (`mvote close`) and tie each vote to a spent dot in the security rules
