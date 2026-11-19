@@ -10,7 +10,7 @@ This is the page participants use to vote. There is no sign-in. A participant op
 
 ## Interface
 
-Screens follow the [UI spec](https://github.com/MalverdeSoftware/malverdesoftware/blob/main/docs/specs/SPEC-ui.md) through the bundled `@malverdesoftware/ui` package. Run `npm run check:ui` to check what a script can see. The open-source components, icons, and fonts the interface uses are listed in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md). Dot positions and card heights stay fixed as votes arrive, so a "+" never moves under someone's finger.
+Screens follow the [UI spec](https://github.com/MalverdeSoftware/mbolts/blob/main/docs/specs/SPEC-ui.md) through the bundled `@malverdesoftware/ui` package. Run `npm run check:ui` to check what a script can see. The open-source components, icons, and fonts the interface uses are listed in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md). Dot positions and card heights stay fixed as votes arrive, so a "+" never moves under someone's finger.
 
 ## Setup
 
