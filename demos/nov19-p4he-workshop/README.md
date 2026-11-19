@@ -8,6 +8,16 @@ Attendees vote once on 25 plain-language factors. Their votes go into an IWFP-st
 - **Notebook:** `vqsierra/IWFP` → `live_vote_demo/P4HE_live_vote_demo.ipynb` (highlights only).
 - **Slides and plan:** the presenter's iCloud talk folder (`1 p4he/P4HE-PLAN.md`).
 
+
+## Nov 19, 2026 workshop record
+
+This is the official record of the session, run on the board `p4he-nov19`.
+
+- [`nov19-run/nov19_p4he_votes.csv`](nov19-run/nov19_p4he_votes.csv): the room's dots per factor. 207 dots, and all 25 factors got at least one.
+- [`nov19-run/nov19_p4he_model_results.csv`](nov19-run/nov19_p4he_model_results.csv): the model's result table. It kept 14 of the 25 factors (6 higher risk, 6 protective, 2 weak or unstable), with a cross-validated AUC of 0.89 (0.87 to 0.91). All modeling used synthetic data.
+
+The saved notebook run is public in the IWFP repo as `live_vote_demo/P4HE_live_vote_demo_nov19-2026_run.ipynb` (vqsierra/IWFP#20). These files hold per-factor totals only. The board's per-participant records aren't copied here.
+
 ## Board settings
 
 - Board id: `p4he-nov19`
@@ -30,7 +40,7 @@ PYTHONPATH=cli .venv/bin/python3 -m mvote.cli create \
 
 Put `p4he-qr.png` and the short link on the vote slide. Rehearse on a separate board (`p4he-rehearsal`) so the real board starts empty, then run the notebook against it.
 
-**Don't merge anything into mvote `main` before the talk.** Merging deploys mvote.app.
+The board and runbook were merged after the talk, as planned, because merging deploys mvote.app.
 
 ## During the talk
 
