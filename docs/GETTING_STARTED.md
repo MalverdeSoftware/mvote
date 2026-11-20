@@ -4,7 +4,7 @@ This guide is for when you have a session coming up and want to know what to do.
 
 ## One-time setup
 
-1. **Install Python 3.9 or newer** if you don't have it.
+1. **Install Python 3.10 or newer** if you don't have it.
 2. **Install the command line tool** from [PyPI](https://pypi.org/project/mvote/):
 
    ```bash

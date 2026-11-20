@@ -9,7 +9,7 @@ description = "CLI for creating and configuring mVote participatory sticky-note 
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors = [
   { name = "Valentín Quiroz de la Sierra" },
   { name = "Marissa Ledesma" },
