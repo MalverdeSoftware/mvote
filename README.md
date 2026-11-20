@@ -17,7 +17,7 @@ mVote is a sticky-dot voting tool for research and community activities. A group
 
 ## Run a session
 
-You need Python 3.9 or newer.
+You need Python 3.10 or newer.
 
 ```bash
 pip install mvote
